@@ -3,11 +3,17 @@
 @theme {
   --color-blue: #6436f1;
   --color-black: #0a090b;
-  --color-gray: #7F8190;
+  --color-gray: #7f8190;
+  --color-a5: #a5abb2;
+  --color-ee: #eee;
 }
 
 * {
   font-family: "Poppins", sans-serif;
+}
+
+.text-14 {
+  @apply text-xs md:text-sm;
 }
 
 .text-16 {

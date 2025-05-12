@@ -8,7 +8,7 @@
       >
         <div class="flex gap-3 items-center">
           <img class="w-7 lg:w-9" src="/icons/logo.svg" alt="" />
-          <p class="text-20 text-black font-extrabold">CBT</p>
+          <p class="text-20 text-black font-extrabold">AzamCBT</p>
         </div>
         <div class="flex gap-5 lg:gap-7.5 items-center lg:hidden">
           <p class="text-black font-semibold text-16">Docs</p>

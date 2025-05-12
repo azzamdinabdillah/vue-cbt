@@ -5,10 +5,11 @@ import { createRouter, createWebHistory } from "vue-router";
 import Auth from "./pages/auth/Auth.vue";
 import Login from "./pages/auth/Login.vue";
 import Register from "./pages/auth/Register.vue";
+import Overview from "./pages/teacher/overview/Overview.vue";
+import Dashboard from "./pages/Dashboard.vue";
 
 const router = createRouter({
   routes: [
-    { path: "/", component: App },
     {
       path: "/auth",
       component: Auth,
@@ -20,6 +21,16 @@ const router = createRouter({
         {
           path: "register",
           component: Register,
+        },
+      ],
+    },
+    {
+      path: "/",
+      component: Dashboard,
+      children: [
+        {
+          path: "",
+          component: Overview,
         },
       ],
     },

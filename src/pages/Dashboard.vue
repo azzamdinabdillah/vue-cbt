@@ -1,0 +1,31 @@
+<script setup>
+import Sidebar from "../components/Sidebar.vue";
+import Header from "../components/Header.vue";
+import { ref } from "vue";
+
+const isOpen = ref(false);
+const toggleSidebar = () => {
+  isOpen.value = !isOpen.value;
+};
+</script>
+
+<template>
+  <div class="">
+    <Sidebar @toggle-sidebar="toggleSidebar" :isOpen="isOpen" />
+    <div class="main">
+      <Header @toggle-sidebar="toggleSidebar" />
+      <div class="p-5">
+        <RouterView />
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+@media (min-width: 1024px) {
+  .main {
+    width: calc(100% - 270px);
+    margin-left: 270px;
+  }
+}
+</style>
