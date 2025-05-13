@@ -1,4 +1,5 @@
 <script setup>
+import { RouterLink } from "vue-router";
 import Button from "../../components/Button.vue";
 import InputGroup from "../../components/InputGroup.vue";
 </script>
@@ -25,7 +26,9 @@ import InputGroup from "../../components/InputGroup.vue";
       type="password"
     />
 
-    <Button custom-class="w-full">Sign In to my Account</Button>
+    <RouterLink :to="{ name: 'overview' }" class="w-full">
+      <Button custom-class="w-full">Sign In to my Account</Button>
+    </RouterLink>
   </div>
 </template>
 

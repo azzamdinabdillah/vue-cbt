@@ -1,12 +1,23 @@
 <script setup lang="ts">
-defineProps<{
-  customClass?: string;
-}>();
+withDefaults(
+  defineProps<{
+    customClass?: string;
+    variant: "blue" | "orange";
+  }>(),
+  {
+    variant: "blue",
+  }
+);
+
+const variantClass = {
+  blue: "bg-blue text-white",
+  orange: "bg-orange text-white",
+};
 </script>
 
 <template>
   <button
-    :class="`bg-blue rounded-full py-3.5 px-5 text-white text-16 font-bold text-16 w-fit cursor-pointer hover:opacity-80 transition-all ${customClass}`"
+    :class="`${variantClass[variant]} rounded-full py-3.5 px-5 text-16 font-bold text-16 w-fit cursor-pointer hover:opacity-80 transition-all ${customClass}`"
   >
     <slot />
   </button>

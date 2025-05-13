@@ -12,7 +12,7 @@ const toggleSidebar = () => {
 <template>
   <div class="">
     <Sidebar @toggle-sidebar="toggleSidebar" :isOpen="isOpen" />
-    <div class="main">
+    <div class="main mt-[80px] lg:mt-[95px]">
       <Header @toggle-sidebar="toggleSidebar" />
       <div class="p-5">
         <RouterView />

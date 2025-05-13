@@ -26,10 +26,11 @@ defineProps<{
         :id="id"
         :type="type"
         :placeholder="placeholder"
-        :class="`w-full text-16 font-semibold text- outline-none focus:border-2 focus:border-black transition-all placeholder:text-16 placeholder:text-gray placeholder:font-normal border border-[#EEE] bg-white rounded-full py-3.5 px-4 ${suffix ? 'pr-[60px]' : ''} ${
-          prefix ? 'pl-[50px]' : ''
-        }`"
+        :class="`w-full text-16 font-semibold focus:outline-none transition-shadow shadow-[0_0_0_1px_#EEE] focus:shadow-[0_0_0_2px_black] placeholder:text-16 placeholder:text-gray placeholder:font-normal bg-white rounded-full py-3.5 px-4 ${
+          suffix ? 'pr-[60px]' : ''
+        } ${prefix ? 'pl-[50px]' : ''}`"
       />
+
       <img
         :src="suffix"
         alt=""

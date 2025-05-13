@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="grid lg:grid-cols-2 min-h-[100dvh]">
+  <div class="grid lg:grid-cols-2 min-h-[100dvh] overflow-hidden">
     <div class="left p-5 lg:py-[30px] lg:px-[50px]">
       <div
         class="top flex justify-between items-center flex-col gap-2 lg:items-start"
