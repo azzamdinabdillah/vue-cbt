@@ -20,7 +20,7 @@ const menus: {
   {
     inactiveIcon: "/icons/note-favorite.svg",
     activeIcon: "/icons/note-favorite-active.svg",
-    link: "/courses",
+    link: "/course",
     title: "Courses",
   },
 ];
@@ -73,12 +73,12 @@ const hoveredMenu = ref<number>(-1);
 
 <style scoped>
 .menu:hover,
-.menu.router-link-active {
+.menu.router-link-exact-active {
   background-color: #6456f1;
 }
 
 .menu:hover p,
-.menu.router-link-active p {
+.menu.router-link-exact-active p {
   color: white;
 }
 </style>

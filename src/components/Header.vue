@@ -4,7 +4,7 @@ import InputGroup from "./InputGroup.vue";
 
 <template>
   <div
-    class="header p-4 md:p-5 flex justify-between items-center gap-4 border-b border-b-ee fixed top-0 w-full right-0 bg-white z-10"
+    class="header p-4 md:p-5 flex justify-between items-center gap-4 border-b border-b-ee w-full fixed top-0 right-0 bg-white z-10"
   >
     <div class="lg:max-w-[400px] lg:w-full">
       <InputGroup
@@ -37,7 +37,7 @@ import InputGroup from "./InputGroup.vue";
 
 <style scoped>
 @media (min-width: 1024px) {
-  .main {
+  .header {
     width: calc(100% - 270px);
   }
 }
