@@ -36,7 +36,9 @@ import InputGroup from "./InputGroup.vue";
 </template>
 
 <style scoped>
-.header {
-  width: calc(100% - 270px);
+@media (min-width: 1024px) {
+  .main {
+    width: calc(100% - 270px);
+  }
 }
 </style>
