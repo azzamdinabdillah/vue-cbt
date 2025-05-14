@@ -4,6 +4,7 @@ import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
 import Title from "../../../../components/Title.vue";
+import CustomSelectGroup from "../../../../components/CustomSelectGroup.vue";
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const profile = ref<File | null>(null);
@@ -38,7 +39,7 @@ const imageUrl = computed(() => {
         <img
           :src="imageUrl ? imageUrl : '/images/profile-placeholder.png'"
           alt=""
-          class="w-[100px] h-[100px] rounded-full"
+          class="w-[100px] h-[100px] rounded-full object-cover"
         />
         <Button
           @click="() => fileInput?.click()"
@@ -68,6 +69,13 @@ const imageUrl = computed(() => {
         placeholder="Write your better course name"
         prefix="/icons/note-favorite-black.svg"
         type="text"
+      />
+
+      <CustomSelectGroup
+        label="Category"
+        placeholder="Select Category"
+        icon="/icons/bill.svg"
+        :option="['Programming', 'Design', 'Marketing']"
       />
     </form>
   </div>
