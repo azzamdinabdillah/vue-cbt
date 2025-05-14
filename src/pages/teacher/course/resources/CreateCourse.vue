@@ -34,7 +34,7 @@ const imageUrl = computed(() => {
       subTitle="Provide high quality for best students"
     ></Title>
 
-    <form class="flex-col-wrapper">
+    <form class="flex-col-wrapper md:pl-8 lg:pl-12.5 md:max-w-1/2">
       <div class="flex items-center gap-5">
         <img
           :src="imageUrl ? imageUrl : '/images/profile-placeholder.png'"
