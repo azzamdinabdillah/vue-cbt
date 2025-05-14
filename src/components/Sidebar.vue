@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 defineProps<{
   isOpen?: boolean;
 }>();
+
+const route = useRoute();
+
+const routePath = computed(() => route.path);
 
 const menus: {
   inactiveIcon: string;
@@ -51,13 +56,19 @@ const hoveredMenu = ref<number>(-1);
         <template v-for="(menu, index) in menus" :key="menu.link">
           <router-link
             :to="menu.link"
-            class="menu flex gap-3 items-center py-2.5 px-4 rounded-full transition-all"
+            :class="[
+              'menu flex gap-3 items-center py-2.5 px-4 rounded-full transition-all',
+              routePath.split('/')[1] === menu.link.split('/')[1]
+                ? 'active-course'
+                : '',
+            ]"
             @mouseover="hoveredMenu = index"
             @mouseleave="hoveredMenu = -1"
           >
             <img
               :src="
-                hoveredMenu === index || $route.path === menu.link
+                hoveredMenu === index ||
+                routePath.split('/')[1] === menu.link.split('/')[1]
                   ? menu.activeIcon
                   : menu.inactiveIcon
               "
@@ -73,12 +84,14 @@ const hoveredMenu = ref<number>(-1);
 
 <style scoped>
 .menu:hover,
-.menu.router-link-exact-active {
+.menu.router-link-exact-active,
+.active-course {
   background-color: #6456f1;
 }
 
 .menu:hover p,
-.menu.router-link-exact-active p {
+.menu.router-link-exact-active p,
+.active-course p {
   color: white;
 }
 </style>

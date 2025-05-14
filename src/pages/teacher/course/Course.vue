@@ -1,7 +1,69 @@
-<script setup>
+<script setup lang="ts">
+import { RouterLink } from "vue-router";
 import Button from "../../../components/Button.vue";
+import CategoryBadge from "../../../components/CategoryBadge.vue";
+import Pagination from "../../../components/Pagination.vue";
 import TableSelectAction from "../../../components/TableSelectAction.vue";
 import Title from "../../../components/Title.vue";
+import dayjs from "dayjs";
+
+interface TableIF {
+  course: {
+    image: string;
+    title: string;
+    subtitle: string;
+  };
+  dateCreated: Date;
+  category: "Product Design" | "Programming" | "Marketing";
+}
+
+const table: TableIF[] = [
+  {
+    course: {
+      image: "/icons/last-course-1.svg",
+      title: "Design Interview",
+      subtitle: "Beginners",
+    },
+    dateCreated: new Date("2024-08-22"),
+    category: "Product Design",
+  },
+  {
+    course: {
+      image: "/icons/last-course-2.svg",
+      title: "Intro to Full-Stack",
+      subtitle: "Beginners",
+    },
+    dateCreated: new Date("2024-03-11"),
+    category: "Programming",
+  },
+  {
+    course: {
+      image: "/icons/last-course-3.svg",
+      title: "Digital Marketing 101",
+      subtitle: "Beginners",
+    },
+    dateCreated: new Date("2024-03-11"),
+    category: "Marketing",
+  },
+  {
+    course: {
+      image: "/icons/last-course-4.svg",
+      title: "Usability-Testing",
+      subtitle: "Beginners",
+    },
+    dateCreated: new Date("2024-06-30"),
+    category: "Product Design",
+  },
+  {
+    course: {
+      image: "/icons/last-course-5.svg",
+      title: "Web Development",
+      subtitle: "Beginners",
+    },
+    dateCreated: new Date("2024-06-30"),
+    category: "Programming",
+  },
+];
 </script>
 
 <template>
@@ -11,15 +73,17 @@ import Title from "../../../components/Title.vue";
       subTitle="Provide high quality for best students"
     >
       <template #rightElement>
-        <Button>Add New Course</Button>
+        <RouterLink :to="{ name: 'create-course' }">
+          <Button>Add New Course</Button>
+        </RouterLink>
       </template>
     </Title>
 
-    <div class="overflow-x-auto overflow-y-hidden w-full pb-6">
+    <div class="overflow-x-auto overflow-y-hidden w-full pb-6 lg:pb-0">
       <table class="w-max md:w-full">
         <thead>
           <tr>
-            <th align="start">Course</th>
+            <th class="text-start">Course</th>
             <th>Date Created</th>
             <th>Category</th>
             <th>Action</th>
@@ -27,32 +91,30 @@ import Title from "../../../components/Title.vue";
         </thead>
 
         <tbody>
-          <tr v-for="i in 5">
+          <tr v-for="(row, index) in table">
             <td>
               <div class="flex items-center gap-4">
                 <img
-                  src="/icons/last-course-1.svg"
+                  :src="row.course.image"
                   alt=""
                   class="w-[50px] md:w-[64px]"
                 />
                 <div class="flex-col-1">
-                  <h4 class="text-18 font-bold text-black">Design Interview</h4>
+                  <h4 class="text-18 font-bold text-black">
+                    {{ row.course.title }}
+                  </h4>
                   <p class="text-16 text-gray text-start font-normal">
-                    Beginners
+                    {{ row.course.subtitle }}
                   </p>
                 </div>
               </div>
             </td>
-            <td>22 August 2024</td>
+            <td>{{ dayjs(row.dateCreated).format("DD MMMM YYYY") }}</td>
             <td>
-              <div
-                class="py-2 px-4 w-fit mx-auto bg-[#FFF2E6] text-14 font-bold text-[#F6770B] rounded-full"
-              >
-                Product Design
-              </div>
+              <CategoryBadge :category="row.category" />
             </td>
             <td>
-              <TableSelectAction :direction="`${i > 3 ? 'top' : 'bottom'}`">
+              <TableSelectAction :direction="`${index > 3 ? 'top' : 'bottom'}`">
                 <p class="">Manage</p>
                 <p class="">Students</p>
                 <p class="">Edit Course</p>
@@ -63,7 +125,13 @@ import Title from "../../../components/Title.vue";
         </tbody>
       </table>
     </div>
+
+    <div class="flex gap-4 items-center">
+      <Pagination v-for="i in 5" :page="i" :isActive="i === 3 ? true : false" />
+    </div>
   </div>
+
+  <RouterView></RouterView>
 </template>
 
 <style scoped>

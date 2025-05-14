@@ -8,8 +8,8 @@ import Register from "./pages/auth/Register.vue";
 import Overview from "./pages/teacher/overview/Overview.vue";
 import Dashboard from "./pages/Dashboard.vue";
 import Course from "./pages/teacher/course/Course.vue";
-import "vue-select/dist/vue-select.css";
-import vSelect from "vue-select";
+import CreateCourse from "./pages/teacher/course/resources/CreateCourse.vue";
+import CourseLayout from "./pages/teacher/course/CourseLayout.vue";
 
 const router = createRouter({
   routes: [
@@ -38,8 +38,20 @@ const router = createRouter({
         },
         {
           path: "course",
-          component: Course,
+          component: CourseLayout,
           name: "teacher-course",
+          children: [
+            {
+              path: "",
+              component: Course,
+              name: "course",
+            },
+            {
+              path: "create-course",
+              component: CreateCourse,
+              name: "create-course",
+            },
+          ],
         },
       ],
     },
@@ -47,4 +59,4 @@ const router = createRouter({
   history: createWebHistory(),
 });
 
-createApp(App).use(router).component("v-select", vSelect).mount("#app");
+createApp(App).use(router).mount("#app");

@@ -2,7 +2,7 @@
 withDefaults(
   defineProps<{
     customClass?: string;
-    variant: "blue" | "orange";
+    variant?: "blue" | "orange" | "black";
   }>(),
   {
     variant: "blue",
@@ -12,6 +12,7 @@ withDefaults(
 const variantClass = {
   blue: "bg-blue text-white",
   orange: "bg-orange text-white",
+  black: "bg-black text-white",
 };
 </script>
 

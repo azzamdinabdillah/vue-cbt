@@ -9,11 +9,11 @@ const isOpen = ref(false);
 
 <template>
   <div
-    :class="`w-[120px] table-select-action cursor-pointer justify-center mx-auto border transition-all border-ee rounded-[18px] relative flex flex-col gap-3 ${
+    :class="`w-[120px] cursor-pointer justify-center mx-auto border transition-all border-ee rounded-[18px] relative flex flex-col gap-3 ${
       isOpen
         ? direction === 'top'
-          ? 'border-t-0 rounded-t-none'
-          : 'border-b-0 rounded-b-none'
+          ? 'border-t-0 rounded-t-none table-select-action'
+          : 'border-b-0 rounded-b-none table-select-action'
         : ''
     }`"
   >
@@ -38,11 +38,15 @@ const isOpen = ref(false);
         direction === 'top'
           ? 'border-b-0 bottom-full pb-0 rounded-t-[18px]'
           : 'border-t-0 top-full pt-0 rounded-b-[18px]'
-      } -left-[.5px] -right-[1px]`"
+      } -left-[1px] -right-[1px]`"
     >
       <slot></slot>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.table-select-action {
+  box-shadow: 0px 10px 16px 0px rgba(10, 9, 11, 0.05);
+}
+</style>
