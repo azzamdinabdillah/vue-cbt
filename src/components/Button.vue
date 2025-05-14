@@ -3,9 +3,13 @@ withDefaults(
   defineProps<{
     customClass?: string;
     variant?: "blue" | "orange" | "black";
+    shadow?: boolean;
+    type?: "button" | "submit" | "reset";
   }>(),
   {
     variant: "blue",
+    shadow: true,
+    type: "button",
   }
 );
 
@@ -18,14 +22,17 @@ const variantClass = {
 
 <template>
   <button
-    :class="`${variantClass[variant]} rounded-full py-3.5 px-5 text-16 font-bold text-16 w-fit cursor-pointer hover:opacity-80 transition-all ${customClass}`"
+    :type="type"
+    :class="`${variantClass[variant]} ${
+      shadow ? 'shadow' : ''
+    } rounded-full py-3.5 px-5 text-16 font-bold text-16 w-fit cursor-pointer hover:opacity-80 transition-all ${customClass}`"
   >
     <slot />
   </button>
 </template>
 
 <style scoped>
-button {
+.shadow {
   box-shadow: 0px 4px 15px 0px rgba(100, 54, 241, 0.3);
 }
 </style>
