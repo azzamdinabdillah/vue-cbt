@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
 defineProps<{
@@ -11,22 +11,45 @@ const route = useRoute();
 const routePath = computed(() => route.path);
 
 const menus: {
-  inactiveIcon: string;
-  activeIcon: string;
-  link: string;
-  title: string;
+  group: string;
+  links: {
+    id: number;
+    inactiveIcon: string;
+    activeIcon: string;
+    link: string;
+    title: string;
+  }[];
 }[] = [
   {
-    inactiveIcon: "/icons/home-hashtag.svg",
-    activeIcon: "/icons/home-hashtag-active.svg",
-    link: "/",
-    title: "Overview",
+    group: "Daily Use",
+    links: [
+      {
+        id: 1,
+        inactiveIcon: "/icons/home-hashtag.svg",
+        activeIcon: "/icons/home-hashtag-active.svg",
+        link: "/",
+        title: "Overview",
+      },
+      {
+        id: 2,
+        inactiveIcon: "/icons/note-favorite.svg",
+        activeIcon: "/icons/note-favorite-active.svg",
+        link: "/course",
+        title: "Courses",
+      },
+    ],
   },
   {
-    inactiveIcon: "/icons/note-favorite.svg",
-    activeIcon: "/icons/note-favorite-active.svg",
-    link: "/course",
-    title: "Courses",
+    group: "Others",
+    links: [
+      {
+        id: 3,
+        inactiveIcon: "/icons/security-safe.svg",
+        activeIcon: "/icons/security-safe.svg",
+        link: "/auth/login",
+        title: "Logout",
+      },
+    ],
   },
 ];
 
@@ -50,33 +73,37 @@ const hoveredMenu = ref<number>(-1);
         <h2 class="text-20 text-black font-extrabold">AzamCBT</h2>
       </div>
 
-      <div class="flex gap-3 flex-col">
-        <h3 class="text-a5 font-bold text-xs">DAILY USE</h3>
+      <div class="flex-col-wrapper">
+        <div v-for="menu in menus" class="flex gap-3 flex-col">
+          <h3 class="text-a5 font-bold text-xs">{{ menu.group }}</h3>
 
-        <template v-for="(menu, index) in menus" :key="menu.link">
-          <router-link
-            :to="menu.link"
-            :class="[
-              'menu flex gap-3 items-center py-2.5 px-4 rounded-full transition-all',
-              routePath.split('/')[1] === menu.link.split('/')[1]
-                ? 'active-course'
-                : '',
-            ]"
-            @mouseover="hoveredMenu = index"
-            @mouseleave="hoveredMenu = -1"
-          >
-            <img
-              :src="
-                hoveredMenu === index ||
-                routePath.split('/')[1] === menu.link.split('/')[1]
-                  ? menu.activeIcon
-                  : menu.inactiveIcon
-              "
-              alt=""
-            />
-            <p class="text-16 text-black font-semibold">{{ menu.title }}</p>
-          </router-link>
-        </template>
+          <template v-for="(rowLink, index) in menu.links" :key="rowLink.id">
+            <router-link
+              :to="rowLink.link"
+              :class="[
+                'menu flex gap-3 items-center py-2.5 px-4 rounded-full transition-all',
+                routePath.split('/')[1] === rowLink.link.split('/')[1]
+                  ? 'active-course'
+                  : '',
+              ]"
+              @mouseover="hoveredMenu = rowLink.id"
+              @mouseleave="hoveredMenu = -1"
+            >
+              <img
+                :src="
+                  hoveredMenu === rowLink.id ||
+                  routePath.split('/')[1] === rowLink.link.split('/')[1]
+                    ? rowLink.activeIcon
+                    : rowLink.inactiveIcon
+                "
+                alt=""
+              />
+              <p class="text-16 text-black font-semibold">
+                {{ rowLink.title }}
+              </p>
+            </router-link>
+          </template>
+        </div>
       </div>
     </div>
   </div>

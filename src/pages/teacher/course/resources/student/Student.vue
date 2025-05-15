@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
 import Breadcrump from "../../../../../components/Breadcrump.vue";
 import Button from "../../../../../components/Button.vue";
 import CategoryBadge from "../../../../../components/CategoryBadge.vue";
@@ -60,7 +61,14 @@ const students = [
                 </div>
               </div>
               <div class="relative md:hidden">
-                <Button variant="blue">Add Student</Button>
+                <RouterLink
+                  :to="{
+                    name: 'add-student',
+                    params: { courseId: $route.params.courseId },
+                  }"
+                >
+                  <Button variant="blue">Add Student</Button>
+                </RouterLink>
               </div>
             </div>
           </div>
@@ -83,7 +91,14 @@ const students = [
         </div>
 
         <div class="relative hidden md:inline-block">
-          <Button variant="blue">Add Student</Button>
+          <RouterLink
+            :to="{
+              name: 'add-student',
+              params: { courseId: $route.params.courseId },
+            }"
+          >
+            <Button variant="blue">Add Student</Button>
+          </RouterLink>
         </div>
       </div>
 
