@@ -10,12 +10,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-5 md:gap-7.5">
+  <div class="flex flex-wrap gap-2 md:gap-7.5">
     <RouterLink
       v-for="(u, index) in url"
       :to="u.path"
       :class="[
-        'flex group gap-5 md:gap-7.5 text-16',
+        'flex group gap-2 md:gap-7.5 text-16',
         index === url.length - 1 ? 'text-black font-semibold' : 'text-gray',
       ]"
     >

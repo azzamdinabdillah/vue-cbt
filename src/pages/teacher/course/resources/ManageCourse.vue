@@ -146,7 +146,11 @@ const openMenu = ref(false);
       <div class="flex-col-30">
         <div class="flex flex-col gap-2">
           <h1 class="text-24 font-bold text-black">Course Tests</h1>
-          <div
+          <RouterLink
+            :to="{
+              name: 'new-question',
+              params: { courseId: $route.params.courseId },
+            }"
             class="box group cursor-pointer transition-all flex justify-center items-center gap-2 md:gap-5 h-[92px]"
           >
             <img
@@ -159,7 +163,7 @@ const openMenu = ref(false);
             >
               Add New Question
             </h2>
-          </div>
+          </RouterLink>
         </div>
 
         <div
