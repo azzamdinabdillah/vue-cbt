@@ -15,11 +15,11 @@ defineProps<{
       v-for="(u, index) in url"
       :to="u.path"
       :class="[
-        'flex gap-5 md:gap-7.5 text-16',
+        'flex group gap-5 md:gap-7.5 text-16',
         index === url.length - 1 ? 'text-black font-semibold' : 'text-gray',
       ]"
     >
-      <p>{{ u.name }}</p>
+      <p class="group-hover:text-black transition-all">{{ u.name }}</p>
       <span v-if="index !== url.length - 1">/</span>
     </RouterLink>
   </div>

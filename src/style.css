@@ -39,3 +39,15 @@
 .flex-col-1 {
   @apply flex flex-col gap-1 lg:gap-0;
 }
+
+.checkbox-style {
+  @apply cursor-pointer w-5 h-5 md:w-6 md:h-6 rounded-full accent-[#2B82FE] appearance-none border-2 border-[#EEEEEE] checked:before:rounded-full checked:before:border-2 checked:md:before:border-[3.5px] checked:before:border-white checked:before:w-full checked:before:h-full checked:before:absolute checked:before:inset-0 checked:before:bg-[#2B82FE] relative focus:outline-none focus:ring-0;
+}
+
+.border-shadow-gray {
+  @apply shadow-[0_0_0_1px_#EEE];
+}
+
+.border-shadow-active-black {
+  @apply shadow-[0_0_0_2px_black];
+}

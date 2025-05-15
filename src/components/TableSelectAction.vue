@@ -32,7 +32,7 @@ const isOpen = ref(false);
     <div
       :class="`menu ${
         isOpen
-          ? 'opacity-100 select-all pointer-events-auto'
+          ? 'opacity-100 select-auto pointer-events-auto'
           : 'opacity-0 select-none pointer-events-none'
       } flex z-10 text-14 text-black font-semibold transition-all flex-col gap-3 items-start absolute bg-white border border-ee py-[10px] px-4 ${
         direction === 'top'

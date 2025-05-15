@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-defineProps<{
-  icon?: string;
-  placeholder?: string;
-  option: string[];
-  label?: string;
-}>();
+withDefaults(
+  defineProps<{
+    icon?: string;
+    placeholder?: string;
+    option: string[];
+    label?: string;
+    direction?: "top" | "bottom";
+  }>(),
+  {
+    icon: "/icons/placeholder.svg",
+    placeholder: "Select an option",
+    label: "Select",
+    direction: "bottom",
+  }
+);
 
 const isOpen = ref(false);
 const selected = ref("");
@@ -18,7 +27,10 @@ const selected = ref("");
     <div class="relative">
       <div
         @click="isOpen = !isOpen"
-        class="top cursor-pointer flex justify-between transition-all items-center border border-ee py-3.5 px-4 rounded-full"
+        :class="[
+          'top cursor-pointer flex justify-between transition-all items-center py-3 md:py-3.5 px-4 rounded-full',
+          isOpen ? 'border-shadow-active-black' : 'border-shadow-gray',
+        ]"
       >
         <div class="flex items-center gap-3.5">
           <img :src="icon" alt="" />
@@ -40,10 +52,11 @@ const selected = ref("");
 
       <div
         :class="[
-          'border shadow transition-all border-ee py-3.5 px-4 rounded-xl absolute top-[60px] bg-white gap-3 flex flex-col w-[100%] left-0 right-0',
+          'border shadow transition-all z-10 border-ee py-3.5 px-4 rounded-xl absolute bg-white gap-3 flex flex-col w-[100%] left-0 right-0',
           isOpen
             ? 'opacity-100 pointer-events-auto select-auto'
             : 'opacity-0 pointer-events-none select-none',
+          direction === 'top' ? 'bottom-[60px]' : 'top-[60px]',
         ]"
       >
         <div

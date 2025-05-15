@@ -34,7 +34,9 @@ const imageUrl = computed(() => {
       subTitle="Provide high quality for best students"
     ></Title>
 
-    <form class="flex-col-wrapper md:pl-8 lg:pl-12.5 md:max-w-1/2">
+    <form
+      class="flex-col-wrapper md:pl-8 lg:pl-12.5 md:max-w-[70%] lg:max-w-[500px] pb-10"
+    >
       <div class="flex items-center gap-5">
         <img
           :src="imageUrl ? imageUrl : '/images/profile-placeholder.png'"
@@ -77,6 +79,28 @@ const imageUrl = computed(() => {
         icon="/icons/bill.svg"
         :option="['Programming', 'Design', 'Marketing']"
       />
+
+      <CustomSelectGroup
+        direction="top"
+        label="Level"
+        placeholder="Select level"
+        icon="/icons/security-user.svg"
+        :option="['Beginner', 'Intermediate', 'Expert']"
+      />
+
+      <div class="flex gap-2.5">
+        <input id="aggree" type="checkbox" class="checkbox-style" />
+        <label
+          for="aggree"
+          class="text-16 cursor-pointer font-semibold text-black"
+        >
+          I have read terms and conditions
+        </label>
+      </div>
+
+      <Button type="submit" variant="blue" customClass="w-full"
+        >Create Course</Button
+      >
     </form>
   </div>
 </template>
