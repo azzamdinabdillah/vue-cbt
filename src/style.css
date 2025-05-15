@@ -15,6 +15,10 @@
   font-family: "Poppins", sans-serif;
 }
 
+.text-12 {
+  @apply text-[10px] md:text-xs;
+}
+
 .text-14 {
   @apply text-xs md:text-sm;
 }

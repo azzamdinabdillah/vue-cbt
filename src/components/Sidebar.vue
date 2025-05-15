@@ -43,7 +43,7 @@ const hoveredMenu = ref<number>(-1);
     }`"
   >
     <div
-      class="bg-[#FBFBFB] border-l border-l-ee w-[70%] lg:w-full lg:border-r lg:border-r-ee lg:mr-auto lg:ml-0 h-full ml-auto p-6 lg:p-7.5 flex flex-col gap-6 lg:gap-7.5"
+      class="bg-[#FBFBFB] border-l border-l-ee w-[70%] md:w-[35%] lg:w-full lg:border-r lg:border-r-ee lg:mr-auto lg:ml-0 h-full ml-auto p-6 lg:p-7.5 flex flex-col gap-6 lg:gap-7.5"
     >
       <div class="flex gap-3 items-center justify-center">
         <img src="/icons/logo.svg" alt="" />

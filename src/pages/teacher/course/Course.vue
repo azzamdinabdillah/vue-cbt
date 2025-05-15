@@ -120,7 +120,11 @@ const table: TableIF[] = [
                   class=""
                   >Manage</RouterLink
                 >
-                <p class="">Students</p>
+                <RouterLink
+                  :to="{ name: 'student', params: { courseId: index } }"
+                  class=""
+                  >Students</RouterLink
+                >
                 <p class="">Edit Course</p>
                 <p class="text-red">Delete</p>
               </TableSelectAction>
