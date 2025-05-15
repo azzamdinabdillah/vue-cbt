@@ -115,7 +115,11 @@ const table: TableIF[] = [
             </td>
             <td>
               <TableSelectAction :direction="`${index > 3 ? 'top' : 'bottom'}`">
-                <p class="">Manage</p>
+                <RouterLink
+                  :to="{ name: 'manage-course', params: { courseId: index } }"
+                  class=""
+                  >Manage</RouterLink
+                >
                 <p class="">Students</p>
                 <p class="">Edit Course</p>
                 <p class="text-red">Delete</p>

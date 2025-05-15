@@ -14,7 +14,7 @@ const toggleSidebar = () => {
     <Sidebar @toggle-sidebar="toggleSidebar" :isOpen="isOpen" />
     <div class="main mt-[80px] lg:mt-[95px]">
       <Header @toggle-sidebar="toggleSidebar" />
-      <div class="p-5 md:p-8 lg:p-5">
+      <div class="p-5 md:p-8 lg:p-5 pb-12 lg:pb-10">
         <RouterView />
       </div>
     </div>

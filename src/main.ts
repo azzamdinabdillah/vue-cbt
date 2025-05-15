@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard.vue";
 import Course from "./pages/teacher/course/Course.vue";
 import CreateCourse from "./pages/teacher/course/resources/CreateCourse.vue";
 import CourseLayout from "./pages/teacher/course/CourseLayout.vue";
+import ManageCourse from "./pages/teacher/course/resources/ManageCourse.vue";
 
 const router = createRouter({
   routes: [
@@ -50,6 +51,11 @@ const router = createRouter({
               path: "create-course",
               component: CreateCourse,
               name: "create-course",
+            },
+            {
+              path: "manage-course/:courseId",
+              component: ManageCourse,
+              name: "manage-course",
             },
           ],
         },

@@ -13,7 +13,7 @@ const variant: Record<string, string> = {
 <template>
   <div
     :class="[
-      'py-2 px-4 w-fit mx-auto text-14 font-bold rounded-full',
+      'py-2 px-4 w-fit mx-auto text-14 font-bold rounded-full whitespace-nowrap',
       variant[category],
     ]"
   >

@@ -36,10 +36,10 @@ const hoveredMenu = ref<number>(-1);
 <template>
   <div
     @click="$emit('toggleSidebar')"
-    :class="`h-dvh fixed bg-black/20 top-0 right-0 bottom-0 w-[100vw] z-20 transition-all lg:opacity-100 lg:w-[270px] lg:left-0 ${
+    :class="`h-dvh fixed bg-black/20 top-0 right-0 bottom-0 w-[100vw] z-30 transition-all lg:opacity-100 lg:w-[270px] lg:left-0 ${
       isOpen
         ? 'opacity-100'
-        : 'opacity-0 select-none pointer-events-none lg:select-all lg:pointer-events-auto'
+        : 'opacity-0 select-none pointer-events-none lg:select-auto lg:pointer-events-auto'
     }`"
   >
     <div
