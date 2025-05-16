@@ -203,7 +203,7 @@ const openMenu = ref(false);
               custom-class="p-5 !w-[290px]"
               :isOpen="openMenu"
             >
-              <h1 class="text-16">Question Map : </h1>
+              <h1 class="text-16">Question Map :</h1>
               <div
                 class="flex flex-wrap gap-2.5 items-center justify-center h-full"
               >
@@ -269,8 +269,6 @@ const openMenu = ref(false);
                 );
 
                 mapQuestion[questionOption].isAnswered = option.id;
-                console.log(mapQuestion[questionOption]);
-                // selectedOption = option.id;
               }
             "
             :class="[
@@ -294,7 +292,7 @@ const openMenu = ref(false);
             <img
               :class="[
                 'w-5 md:w-6 absolute right-4 top-1/2 -translate-y-1/2 transition-all',
-                selectedOption === option.id ? 'opacity-100' : 'opacity-0',
+                question.isAnswered === option.id ? 'opacity-100' : 'opacity-0',
               ]"
               src="/icons/tick-circle.svg"
               alt=""
