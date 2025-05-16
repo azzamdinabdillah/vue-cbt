@@ -163,7 +163,6 @@ const questions = [
   },
 ];
 
-const selectedOption = ref<number | null>(null);
 const selectedQuestion = ref<number>(1);
 const mapQuestion: QuestionIF[] = reactive(
   questions.map((question) => {
@@ -175,10 +174,11 @@ const mapQuestion: QuestionIF[] = reactive(
 );
 
 const openMenu = ref(false);
+const isCourseCompleted = ref(false);
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col min-h-dvh">
     <div class="header p-5 border-b border-ee">
       <div class="flex justify-between items-center flex-wrap gap-3">
         <div class="flex gap-3 md:gap-4 items-center">
@@ -191,7 +191,12 @@ const openMenu = ref(false);
         <div
           class="flex justify-between items-center flex-row-reverse w-full md:w-fit"
         >
-          <div class="relative md:fixed md:top-30">
+          <div
+            :class="[
+              'relative md:fixed md:top-30',
+              isCourseCompleted ? 'hidden' : '',
+            ]"
+          >
             <img
               @click="openMenu = !openMenu"
               src="/images/more.png"
@@ -241,6 +246,7 @@ const openMenu = ref(false);
     </div>
 
     <div
+      v-if="!isCourseCompleted"
       class="flex flex-col gap-8 md:gap-[50px] py-8 md:py-8.5 px-3.5 max-w-[821px] mx-auto w-full"
     >
       <div
@@ -305,7 +311,6 @@ const openMenu = ref(false);
         <Button
           @click="selectedQuestion--"
           variant="black"
-          :disabled="selectedQuestion === 1"
           :class="[
             'max-w-[254px] w-full mx-auto',
             selectedQuestion === 1 ? 'hidden' : 'inline-block',
@@ -316,7 +321,6 @@ const openMenu = ref(false);
         <Button
           @click="selectedQuestion++"
           variant="blue"
-          :disabled="selectedQuestion === questions.length"
           :class="[
             'max-w-[254px] w-full mx-auto',
             selectedQuestion === questions.length ? 'hidden' : 'inline-block',
@@ -325,6 +329,39 @@ const openMenu = ref(false);
           Next Question
         </Button>
       </div>
+      <Button
+        @click="isCourseCompleted = true"
+        variant="orange"
+        v-if="mapQuestion.every((q) => q.isAnswered !== -1)"
+        :class="['max-w-[254px] w-full mx-auto']"
+      >
+        End Course
+      </Button>
+    </div>
+
+    <div
+      v-else
+      class="flex flex-grow h-full flex-col justify-center items-center gap-8 md:gap-[40px] py-8 md:py-8.5 px-3.5 max-w-[372px] mx-auto w-full md:p-0"
+    >
+      <img
+        src="/icons/last-course-1.svg"
+        alt=""
+        class="w-[150px] md:w-[200px]"
+      />
+
+      <div class="flex flex-col gap-1 md:gap-2">
+        <h1 class="text-xl md:text-2xl text-black font-bold text-center">
+          Congratulations! You Have Finished Test
+        </h1>
+        <p class="text-16 text-gray leading-7 text-center">
+          Hopefully you will get a better result to prepare your great future
+          career soon enough
+        </p>
+      </div>
+
+      <Button variant="blue" custom-class="md:!w-[193px]"
+        >View Test Result</Button
+      >
     </div>
   </div>
 </template>
