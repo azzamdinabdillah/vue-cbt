@@ -17,6 +17,7 @@ const menus: {
     inactiveIcon: string;
     activeIcon: string;
     link: string;
+    linkStudent: string;
     title: string;
   }[];
 }[] = [
@@ -28,6 +29,7 @@ const menus: {
         inactiveIcon: "/icons/home-hashtag.svg",
         activeIcon: "/icons/home-hashtag-active.svg",
         link: "/",
+        linkStudent: "/student",
         title: "Overview",
       },
       {
@@ -35,6 +37,7 @@ const menus: {
         inactiveIcon: "/icons/note-favorite.svg",
         activeIcon: "/icons/note-favorite-active.svg",
         link: "/course",
+        linkStudent: "/student/course",
         title: "Courses",
       },
     ],
@@ -47,6 +50,7 @@ const menus: {
         inactiveIcon: "/icons/security-safe.svg",
         activeIcon: "/icons/security-safe.svg",
         link: "/auth/login",
+        linkStudent: "/auth/login",
         title: "Logout",
       },
     ],
@@ -77,12 +81,12 @@ const hoveredMenu = ref<number>(-1);
         <div v-for="menu in menus" class="flex gap-3 flex-col">
           <h3 class="text-a5 font-bold text-xs">{{ menu.group }}</h3>
 
-          <template v-for="(rowLink, index) in menu.links" :key="rowLink.id">
+          <template v-for="rowLink in menu.links" :key="rowLink.id">
             <router-link
-              :to="rowLink.link"
+              :to="rowLink.linkStudent"
               :class="[
                 'menu flex gap-3 items-center py-2.5 px-4 rounded-full transition-all',
-                routePath.split('/')[1] === rowLink.link.split('/')[1]
+                routePath.split('/')[2] === rowLink.linkStudent.split('/')[2]
                   ? 'active-course'
                   : '',
               ]"
@@ -92,7 +96,7 @@ const hoveredMenu = ref<number>(-1);
               <img
                 :src="
                   hoveredMenu === rowLink.id ||
-                  routePath.split('/')[1] === rowLink.link.split('/')[1]
+                  routePath.split('/')[2] === rowLink.linkStudent.split('/')[2]
                     ? rowLink.activeIcon
                     : rowLink.inactiveIcon
                 "
