@@ -1,18 +1,20 @@
 <script setup lang="ts">
 defineProps<{
   isOpen: boolean;
-  left?: string;
+  position?: string;
+  customClass?: string;
 }>();
 </script>
 
 <template>
   <div
     :class="[
-      'p-5 shadow flex w-fit flex-col gap-4 text-14 text-black font-semibold absolute top-1/2 -translate-y-1/2  border border-ee transition-all rounded-[18px] bg-white z-10',
+      'p-5 shadow flex w-fit flex-col gap-4 text-14 text-black font-semibold absolute border border-ee transition-all rounded-[18px] bg-white z-10',
       isOpen
         ? 'opacity-100 select-auto pointer-events-auto'
         : 'opacity-0 select-none pointer-events-none',
-      left ? left : '-left-[200px]',
+      position ? position : `top-1/2 -translate-y-1/2 -left-[200px]`,
+      customClass,
     ]"
   >
     <slot></slot>

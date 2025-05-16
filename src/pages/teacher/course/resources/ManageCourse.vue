@@ -120,7 +120,7 @@ const openMenu = ref(false);
             alt=""
             class="w-11.5 cursor-pointer hover:scale-110 transition"
           />
-          <FloatingMenu :isOpen="openMenu" left="-left-[220px]">
+          <FloatingMenu :isOpen="openMenu" position="top-1/2 -translate-y-1/2 -left-[220px]">
             <div class="flex gap-2.5 items-center">
               <img class="w-5" src="/icons/profile-2user.svg" alt="" />
               <p class="text-14 font-semibold text-black">Add Students</p>

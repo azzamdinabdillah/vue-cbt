@@ -25,7 +25,7 @@ const variantClass = {
     :type="type"
     :class="`${variantClass[variant]} ${
       shadow ? 'shadow' : ''
-    } rounded-full py-3.5 px-5 text-16 font-bold text-16 w-fit cursor-pointer hover:opacity-80 transition-all ${customClass}`"
+    } disabled:opacity-50 rounded-full py-3.5 px-5 text-16 font-bold text-16 w-fit cursor-pointer hover:opacity-80 transition-all ${customClass}`"
   >
     <slot />
   </button>
