@@ -18,6 +18,7 @@ import AddStudent from "./pages/teacher/course/resources/student/AddStudent.vue"
 import StudentCourseLayout from "./pages/student/course/CourseLayout.vue";
 import StudentCourse from "./pages/student/course/Course.vue";
 import Learning from "./pages/student/course/Learning.vue";
+import RaportDetails from "./pages/student/course/RaportDetails.vue";
 
 const router = createRouter({
   routes: [
@@ -100,6 +101,11 @@ const router = createRouter({
               path: "",
               component: StudentCourse,
               name: "student-course",
+            },
+            {
+              path: "raport-details/:courseId",
+              component: RaportDetails,
+              name: "raport-details",
             },
           ],
         },

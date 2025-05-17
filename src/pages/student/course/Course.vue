@@ -111,12 +111,16 @@ const table: TableIF[] = [
               <CategoryBadge :category="row.category" />
             </td>
             <td>
-              <Button
-                custom-class="!w-[120px] py-[10px]"
-                v-if="row.isComplete"
-                variant="black"
-                >Rapport</Button
+              <RouterLink
+                :to="{ name: 'raport-details', params: { courseId: index } }"
               >
+                <Button
+                  custom-class="!w-[120px] py-[10px]"
+                  v-if="row.isComplete"
+                  variant="black"
+                  >Rapport</Button
+                >
+              </RouterLink>
               <RouterLink
                 :to="{ name: 'learning', params: { courseId: index } }"
               >

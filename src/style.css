@@ -9,6 +9,7 @@
   --color-ea: #eae8fe;
   --color-orange: #f6770b;
   --color-red: #fd445e;
+  --color-green: #06BC65;
 }
 
 * {
@@ -25,6 +26,10 @@
 
 .text-16 {
   @apply text-sm md:text-base;
+}
+
+.text-18 {
+  @apply text-[14px] md:text-[18px];
 }
 
 .text-20 {

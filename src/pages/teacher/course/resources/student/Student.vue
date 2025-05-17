@@ -3,6 +3,7 @@ import { RouterLink } from "vue-router";
 import Breadcrump from "../../../../../components/Breadcrump.vue";
 import Button from "../../../../../components/Button.vue";
 import CategoryBadge from "../../../../../components/CategoryBadge.vue";
+import IsPassed from "../../../../../components/IsPassed.vue";
 
 const students = [
   {
@@ -120,27 +121,13 @@ const students = [
               </div>
             </div>
 
-            <div
+            <IsPassed
               v-if="index % 2 === 0"
-              class="border-3 md:border-4 border-dashed border-[#06BC65] p-1 md:p-1.5 rounded-[10px]"
-            >
-              <div
-                class="bg-[#06BC65] py-1.5 px-2.5 rounded-lg text-12 font-bold text-white"
-              >
-                Passed
-              </div>
-            </div>
+              size="sm"
+              :is-passed="true"
+            />
 
-            <div
-              v-else
-              class="border-3 md:border-4 border-dashed border-[#FD445E] p-1 md:p-1.5 rounded-[10px]"
-            >
-              <div
-                class="bg-[#FD445E] py-1.5 px-2.5 rounded-lg text-12 font-bold text-white"
-              >
-                Not Passed
-              </div>
-            </div>
+            <IsPassed v-else size="sm" :is-passed="false" />
           </div>
         </div>
       </div>
