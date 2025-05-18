@@ -1,6 +1,23 @@
 <script setup>
+import { useQuery } from "@tanstack/vue-query";
+import { getData } from "../../../appwrite/api";
+import { databases } from "../../../appwrite/config";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
+import { toRaw, watchEffect } from "vue";
+
+const { isPending, isFetching, isError, data, error } = useQuery({
+  queryKey: ["users"],
+  queryFn: () =>
+    getData({
+      collection: "users",
+      query: [],
+    }),
+});
+
+watchEffect(() => {
+  console.log(toRaw(data.value));
+});
 
 const stats = [
   {

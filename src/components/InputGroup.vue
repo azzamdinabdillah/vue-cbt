@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineProps } from "vue";
 defineProps<{
+  modelValue?: string;
   label?: string;
   id: string;
   prefix?: string;
@@ -23,6 +24,10 @@ defineProps<{
         class="absolute left-4 top-1/2 transform -translate-y-1/2"
       />
       <input
+        autocomplete="true"
+        @input="
+          $emit('update:modelValue', ($event.target as HTMLInputElement).value)
+        "
         :id="id"
         :type="type"
         :placeholder="placeholder"

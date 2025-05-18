@@ -1,15 +1,38 @@
-<script setup>
+<script setup lang="ts">
+import { reactive, watchEffect } from "vue";
 import Button from "../../components/Button.vue";
 import InputGroup from "../../components/InputGroup.vue";
+import type { CollectionUserIF } from "../../interface/databaseCollection";
+import { createData } from "../../appwrite/api";
+import { useMutation } from "@tanstack/vue-query";
+
+const form = reactive<CollectionUserIF>({
+  role: "student",
+  name: "",
+  email: "",
+  password: "",
+  created_at: new Date(),
+});
+
+const { isPending, error, data, mutate } = useMutation({
+  mutationFn: async () => {
+    return await createData({
+      collection: "users",
+      datas: form,
+    });
+  },
+});
 </script>
 
 <template>
-  <div
+  <form
+    @submit.prevent="() => mutate()"
     class="mt-4 lg:mt-0 flex justify-center items-start flex-col gap-5 lg:gap-7.5 lg:h-full lg:justify-center lg:max-w-[450px] lg:mx-auto"
   >
     <h1 class="text-xl lg:text-2xl font-bold text-black">Sign Up</h1>
 
     <InputGroup
+      v-model="form.name"
       id="name"
       label="Complete Name"
       placeholder="Azam Din Abdillah"
@@ -18,6 +41,7 @@ import InputGroup from "../../components/InputGroup.vue";
     />
 
     <InputGroup
+      v-model="form.email"
       id="email"
       label="Email Address"
       placeholder="azamdinabdillah@gmail.com"
@@ -26,6 +50,7 @@ import InputGroup from "../../components/InputGroup.vue";
     />
 
     <InputGroup
+      v-model="form.password"
       id="password"
       label="Password"
       placeholder="Your password"
@@ -41,8 +66,10 @@ import InputGroup from "../../components/InputGroup.vue";
       type="password"
     />
 
-    <Button custom-class="w-full">Create My Account</Button>
-  </div>
+    <Button :disabled="isPending" type="submit" custom-class="w-full">{{
+      isPending ? "Loading..." : "Create My Account"
+    }}</Button>
+  </form>
 </template>
 
 <style scoped></style>

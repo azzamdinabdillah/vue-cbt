@@ -19,6 +19,7 @@ import StudentCourseLayout from "./pages/student/course/CourseLayout.vue";
 import StudentCourse from "./pages/student/course/Course.vue";
 import Learning from "./pages/student/course/Learning.vue";
 import RaportDetails from "./pages/student/course/RaportDetails.vue";
+import { VueQueryPlugin } from "@tanstack/vue-query";
 
 const router = createRouter({
   routes: [
@@ -29,10 +30,12 @@ const router = createRouter({
         {
           path: "login",
           component: Login,
+          name: "login",
         },
         {
           path: "register",
           component: Register,
+          name: "register",
         },
       ],
     },
@@ -120,4 +123,4 @@ const router = createRouter({
   history: createWebHistory(),
 });
 
-createApp(App).use(router).mount("#app");
+createApp(App).use(router).use(VueQueryPlugin).mount("#app");

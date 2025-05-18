@@ -14,11 +14,13 @@
           <p class="text-black font-semibold text-16">Docs</p>
           <p class="text-black font-semibold text-16">About</p>
           <p class="text-black font-semibold text-16">Help</p>
-          <button
-            class="bg-black rounded-full py-2.5 px-5 text-white lg:py-3.5 lg:px-7.5 text-16 font-semibold"
-          >
-            Sign Up
-          </button>
+          <RouterLink :to="{ name: 'register' }">
+            <button
+              class="bg-black rounded-full py-2.5 px-5 text-white lg:py-3.5 lg:px-7.5 text-16 font-semibold"
+            >
+              Sign Up
+            </button>
+          </RouterLink>
         </div>
       </div>
       <RouterView />
@@ -31,14 +33,18 @@
         <p class="text-white font-semibold text-16">Docs</p>
         <p class="text-white font-semibold text-16">About</p>
         <p class="text-white font-semibold text-16">Help</p>
-        <button
-          class="bg-black rounded-full py-2.5 px-5 text-white lg:py-3.5 lg:px-7.5 text-16 font-semibold"
-        >
-          Sign Up
-        </button>
+        <RouterLink :to="{ name: 'register' }">
+          <button
+            class="bg-black rounded-full py-2.5 px-5 text-white lg:py-3.5 lg:px-7.5 text-16 font-semibold"
+          >
+            Sign Up
+          </button>
+        </RouterLink>
       </div>
 
-      <div class="flex flex-col gap-[100px] flex-grow h-full justify-center items-center">
+      <div
+        class="flex flex-col gap-[100px] flex-grow h-full justify-center items-center"
+      >
         <img
           src="/images/auth-image.png"
           alt=""
