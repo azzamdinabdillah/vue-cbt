@@ -3,11 +3,13 @@ import { defineProps } from "vue";
 defineProps<{
   modelValue?: string;
   label?: string;
+  error?: string;
   id: string;
   prefix?: string;
   suffix?: string;
   placeholder?: string;
   type?: "text" | "password" | "email" | "number";
+  required?: boolean;
 }>();
 </script>
 
@@ -24,6 +26,7 @@ defineProps<{
         class="absolute left-4 top-1/2 transform -translate-y-1/2"
       />
       <input
+        :required="required"
         autocomplete="true"
         @input="
           $emit('update:modelValue', ($event.target as HTMLInputElement).value)
@@ -43,6 +46,7 @@ defineProps<{
         class="absolute right-4 top-1/2 transform -translate-y-1/2"
       />
     </div>
+    <p v-if="error" class="text-red text-12 font-medium">{{ error }}</p>
   </div>
 </template>
 

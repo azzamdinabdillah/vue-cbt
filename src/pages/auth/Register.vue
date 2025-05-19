@@ -5,6 +5,9 @@ import InputGroup from "../../components/InputGroup.vue";
 import type { CollectionUserIF } from "../../interface/databaseCollection";
 import { createData } from "../../appwrite/api";
 import { useMutation } from "@tanstack/vue-query";
+import { useForm } from "vee-validate";
+import { z } from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
 
 const form = reactive<CollectionUserIF>({
   role: "student",
@@ -12,6 +15,29 @@ const form = reactive<CollectionUserIF>({
   email: "",
   password: "",
   created_at: new Date(),
+});
+
+const schema = z.object({
+  name: z.string().min(1, "Name is required").min(3, "Name is too short"),
+  email: z.string().email("Email is invalid"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const { errors, defineField, handleSubmit } = useForm({
+  validationSchema: toTypedSchema(schema),
+});
+// const fieldNames = ["role", "name", "email", "password"] as const;
+
+// const field = Object.fromEntries(
+//   fieldNames.map((key) => [key, defineField(key)[0]])
+// );
+
+const [name] = defineField("name");
+const [email] = defineField("email");
+const [password] = defineField("password");
+
+const onSubmit = handleSubmit((data) => {
+  console.log("Data:", data);
 });
 
 const { isPending, error, data, mutate } = useMutation({
@@ -26,13 +52,15 @@ const { isPending, error, data, mutate } = useMutation({
 
 <template>
   <form
-    @submit.prevent="() => mutate()"
+    @submit.prevent="onSubmit"
     class="mt-4 lg:mt-0 flex justify-center items-start flex-col gap-5 lg:gap-7.5 lg:h-full lg:justify-center lg:max-w-[450px] lg:mx-auto"
   >
     <h1 class="text-xl lg:text-2xl font-bold text-black">Sign Up</h1>
 
     <InputGroup
-      v-model="form.name"
+      :error="errors.name"
+      :required="true"
+      v-model="name"
       id="name"
       label="Complete Name"
       placeholder="Azam Din Abdillah"
@@ -41,7 +69,9 @@ const { isPending, error, data, mutate } = useMutation({
     />
 
     <InputGroup
-      v-model="form.email"
+      :error="errors.email"
+      :required="true"
+      v-model="email"
       id="email"
       label="Email Address"
       placeholder="azamdinabdillah@gmail.com"
@@ -50,7 +80,9 @@ const { isPending, error, data, mutate } = useMutation({
     />
 
     <InputGroup
-      v-model="form.password"
+      :error="errors.password"
+      :required="true"
+      v-model="password"
       id="password"
       label="Password"
       placeholder="Your password"
@@ -59,6 +91,7 @@ const { isPending, error, data, mutate } = useMutation({
     />
 
     <InputGroup
+      :required="true"
       id="repeat-password"
       label="Confirm Password"
       placeholder="Repeat your password here..."
