@@ -5,4 +5,5 @@ export interface CollectionUserIF {
   email: string;
   password: string;
   created_at: Date;
+  confirmPassword?: string;
 }

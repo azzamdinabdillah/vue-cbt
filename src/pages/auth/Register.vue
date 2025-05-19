@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watchEffect } from "vue";
+import { ref } from "vue";
 import Button from "../../components/Button.vue";
 import InputGroup from "../../components/InputGroup.vue";
 import type { CollectionUserIF } from "../../interface/databaseCollection";
@@ -9,32 +9,22 @@ import { useForm } from "vee-validate";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 
-const form = reactive<CollectionUserIF>({
-  role: "student",
-  name: "",
-  email: "",
-  password: "",
-  created_at: new Date(),
-});
-
 const schema = z.object({
   name: z.string().min(1, "Name is required").min(3, "Name is too short"),
   email: z.string().email("Email is invalid"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
 });
 
-const { errors, defineField, handleSubmit } = useForm({
+const { errors, defineField, handleSubmit } = useForm<CollectionUserIF>({
   validationSchema: toTypedSchema(schema),
 });
-// const fieldNames = ["role", "name", "email", "password"] as const;
-
-// const field = Object.fromEntries(
-//   fieldNames.map((key) => [key, defineField(key)[0]])
-// );
 
 const [name] = defineField("name");
 const [email] = defineField("email");
 const [password] = defineField("password");
+
+const confirmPassword = ref("");
 
 const onSubmit = handleSubmit((data) => {
   console.log("Data:", data);
@@ -91,6 +81,8 @@ const { isPending, error, data, mutate } = useMutation({
     />
 
     <InputGroup
+      :error="confirmPassword !== password ? 'Password does not match' : ''"
+      v-model="confirmPassword"
       :required="true"
       id="repeat-password"
       label="Confirm Password"
