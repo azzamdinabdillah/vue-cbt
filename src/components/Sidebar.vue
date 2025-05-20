@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 
 defineProps<{
   isOpen?: boolean;
@@ -58,6 +58,11 @@ const menus: {
 ];
 
 const hoveredMenu = ref<number>(-1);
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+function removeUser() {
+  window.localStorage.removeItem("user");
+}
 </script>
 
 <template>
@@ -82,11 +87,15 @@ const hoveredMenu = ref<number>(-1);
           <h3 class="text-a5 font-bold text-xs">{{ menu.group }}</h3>
 
           <template v-for="rowLink in menu.links" :key="rowLink.id">
-            <router-link
-              :to="rowLink.linkStudent"
+            <RouterLink
+              @click="rowLink.link === '/auth/login' ? removeUser() : ''"
+              :to="user.role === 'teacher' ? rowLink.link : rowLink.linkStudent"
               :class="[
                 'menu flex gap-3 items-center py-2.5 px-4 rounded-full transition-all',
-                routePath.split('/')[2] === rowLink.linkStudent.split('/')[2]
+                (user.role === 'teacher' &&
+                  routePath.split('/')[1] === rowLink.link.split('/')[1]) ||
+                (user.role === 'student' &&
+                  routePath.split('/')[2] === rowLink.linkStudent.split('/')[2])
                   ? 'active-course'
                   : '',
               ]"
@@ -96,7 +105,11 @@ const hoveredMenu = ref<number>(-1);
               <img
                 :src="
                   hoveredMenu === rowLink.id ||
-                  routePath.split('/')[2] === rowLink.linkStudent.split('/')[2]
+                  (user.role === 'teacher' &&
+                    routePath.split('/')[1] === rowLink.link.split('/')[1]) ||
+                  (user.role === 'student' &&
+                    routePath.split('/')[2] ===
+                      rowLink.linkStudent.split('/')[2])
                     ? rowLink.activeIcon
                     : rowLink.inactiveIcon
                 "
@@ -105,7 +118,7 @@ const hoveredMenu = ref<number>(-1);
               <p class="text-16 text-black font-semibold">
                 {{ rowLink.title }}
               </p>
-            </router-link>
+            </RouterLink>
           </template>
         </div>
       </div>

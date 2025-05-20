@@ -26,6 +26,19 @@ const router = createRouter({
     {
       path: "/auth",
       component: Auth,
+      beforeEnter: (_to, _from, next) => {
+        const user = localStorage.getItem("user");
+
+        if (user) {
+          if (JSON.parse(user).role !== "student") {
+            next({ name: "student-overview" });
+          } else {
+            next({ name: "overview" });
+          }
+        } else {
+          next();
+        }
+      },
       children: [
         {
           path: "login",
@@ -42,6 +55,29 @@ const router = createRouter({
     {
       path: "/",
       component: Dashboard,
+      beforeEnter: (to, _from, next) => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+          if (to.name !== "login") {
+            return next({ name: "login" });
+          }
+          return next();
+        }
+
+        const parsedUser = JSON.parse(user);
+        const role = parsedUser.role;
+
+        if (role === "student" && to.name !== "student-overview") {
+          return next({ name: "student-overview" });
+        }
+
+        if (role !== "student" && to.name !== "overview") {
+          return next({ name: "overview" });
+        }
+
+        return next();
+      },
       children: [
         {
           path: "",
@@ -90,6 +126,29 @@ const router = createRouter({
     {
       path: "/student",
       component: Dashboard,
+      beforeEnter: (to, _from, next) => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+          if (to.name !== "login") {
+            return next({ name: "login" });
+          }
+          return next();
+        }
+
+        const parsedUser = JSON.parse(user);
+        const role = parsedUser.role;
+
+        if (role === "student" && to.name !== "student-overview") {
+          return next({ name: "student-overview" });
+        }
+
+        if (role !== "student" && to.name !== "overview") {
+          return next({ name: "overview" });
+        }
+
+        return next();
+      },
       children: [
         {
           path: "",

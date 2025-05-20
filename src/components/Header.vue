@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import InputGroup from "./InputGroup.vue";
+
+const user = JSON.parse(localStorage.getItem("user") || "{}");
 </script>
 
 <template>
@@ -23,8 +25,8 @@ import InputGroup from "./InputGroup.vue";
       <div class="gap-3.5 flex items-center">
         <div class="flex items-center gap-3">
           <div class="flex-col hidden md:flex">
-            <p class="text-14 text-gray text-end">Howdy</p>
-            <p class="text-black text-16 font-semibold">Fany Alqo</p>
+            <p class="text-14 text-gray text-end">{{ user.role }}</p>
+            <p class="text-black text-16 font-semibold capitalize">{{ user.name }}</p>
           </div>
           <div @click="$emit('toggleSidebar')" class="md:w-[46px] object-cover">
             <img src="/icons/photo.svg" alt="" class="w-full h-full" />

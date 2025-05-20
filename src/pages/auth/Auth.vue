@@ -14,11 +14,17 @@
           <p class="text-black font-semibold text-16">Docs</p>
           <p class="text-black font-semibold text-16">About</p>
           <p class="text-black font-semibold text-16">Help</p>
-          <RouterLink :to="{ name: 'register' }">
+          <RouterLink
+            :to="
+              $route.path === '/auth/register'
+                ? { name: 'login' }
+                : { name: 'register' }
+            "
+          >
             <button
               class="bg-black rounded-full py-2.5 px-5 text-white lg:py-3.5 lg:px-7.5 text-16 font-semibold"
             >
-              Sign Up
+              {{ $route.path === "/auth/register" ? "Log In" : "Sign Up" }}
             </button>
           </RouterLink>
         </div>
@@ -33,11 +39,17 @@
         <p class="text-white font-semibold text-16">Docs</p>
         <p class="text-white font-semibold text-16">About</p>
         <p class="text-white font-semibold text-16">Help</p>
-        <RouterLink :to="{ name: 'register' }">
+        <RouterLink
+          :to="
+            $route.path === '/auth/register'
+              ? { name: 'login' }
+              : { name: 'register' }
+          "
+        >
           <button
             class="bg-black rounded-full py-2.5 px-5 text-white lg:py-3.5 lg:px-7.5 text-16 font-semibold"
           >
-            Sign Up
+            {{ $route.path === "/auth/register" ? "Log In" : "Sign Up" }}
           </button>
         </RouterLink>
       </div>

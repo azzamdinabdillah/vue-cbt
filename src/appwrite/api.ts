@@ -5,7 +5,7 @@ import type { CollectionUserIF } from "../interface/databaseCollection";
 type collection = "users";
 // type roles = "students" | "teachers";
 
-const databaseId = "682982930002cafc9b6dL";
+const databaseId = "682982930002cafc9b6d";
 const collections: {
   [key in collection]: {
     name: string;
@@ -34,7 +34,7 @@ export async function getData({
 
     return result.documents;
   } catch (error: any) {
-    return error.message;
+    throw new Error(error.message);
   }
 }
 
