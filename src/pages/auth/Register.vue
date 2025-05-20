@@ -10,47 +10,61 @@ import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required").min(3, "Name is too short"),
+  name: z.string().min(1, "Name is required").min(3, "Minimum 3 characters"),
   email: z.string().email("Email is invalid"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
 });
 
-const { errors, defineField, handleSubmit } = useForm<CollectionUserIF>({
-  validationSchema: toTypedSchema(schema),
-});
+const { errors, defineField, handleSubmit, resetForm } =
+  useForm<CollectionUserIF>({
+    validationSchema: toTypedSchema(schema),
+  });
 
-const [name] = defineField("name");
-const [email] = defineField("email");
-const [password] = defineField("password");
+const [name, nameAttr] = defineField("name");
+const [email, emailAttr] = defineField("email");
+const [password, passwordAttr] = defineField("password");
 
 const confirmPassword = ref("");
 
-const onSubmit = handleSubmit((data) => {
-  console.log("Data:", data);
+const onSubmit = handleSubmit(async (data) => {
+  const datas: CollectionUserIF = {
+    ...data,
+    created_at: new Date(),
+    role: "student",
+  };
+
+  mutate(datas);
 });
 
-const { isPending, error, data, mutate } = useMutation({
-  mutationFn: async () => {
+const { isPending, error, mutate } = useMutation({
+  mutationFn: async (datas: CollectionUserIF) => {
     return await createData({
       collection: "users",
-      datas: form,
+      datas: datas,
     });
+  },
+
+  onSuccess: () => {
+    resetForm();
+    confirmPassword.value = "";
   },
 });
 </script>
 
 <template>
   <form
-    @submit.prevent="onSubmit"
+    @submit.prevent="password === confirmPassword ? onSubmit() : ''"
     class="mt-4 lg:mt-0 flex justify-center items-start flex-col gap-5 lg:gap-7.5 lg:h-full lg:justify-center lg:max-w-[450px] lg:mx-auto"
   >
     <h1 class="text-xl lg:text-2xl font-bold text-black">Sign Up</h1>
+
+    <h2 v-if="error" class="text-18 text-red font-medium">{{ error }}</h2>
 
     <InputGroup
       :error="errors.name"
       :required="true"
       v-model="name"
+      :attrs="nameAttr"
       id="name"
       label="Complete Name"
       placeholder="Azam Din Abdillah"
@@ -62,6 +76,7 @@ const { isPending, error, data, mutate } = useMutation({
       :error="errors.email"
       :required="true"
       v-model="email"
+      :attrs="emailAttr"
       id="email"
       label="Email Address"
       placeholder="azamdinabdillah@gmail.com"
@@ -70,6 +85,7 @@ const { isPending, error, data, mutate } = useMutation({
     />
 
     <InputGroup
+      :attrs="passwordAttr"
       :error="errors.password"
       :required="true"
       v-model="password"
@@ -81,7 +97,11 @@ const { isPending, error, data, mutate } = useMutation({
     />
 
     <InputGroup
-      :error="confirmPassword !== password ? 'Password does not match' : ''"
+      :error="
+        confirmPassword !== password && password !== undefined
+          ? 'Password does not match'
+          : ''
+      "
       v-model="confirmPassword"
       :required="true"
       id="repeat-password"
