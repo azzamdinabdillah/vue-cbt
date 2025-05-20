@@ -6,6 +6,20 @@ import Pagination from "../../../components/Pagination.vue";
 import TableSelectAction from "../../../components/TableSelectAction.vue";
 import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
+import { getFile, urlFileStorage } from "../../../appwrite/storage";
+import {
+  createColumnHelper,
+  createTable,
+  FlexRender,
+  getCoreRowModel,
+  useVueTable,
+} from "@tanstack/vue-table";
+import { computed, reactive, toRaw, watchEffect } from "vue";
+import { useQuery } from "@tanstack/vue-query";
+import { getData } from "../../../appwrite/api";
+import type { Models } from "appwrite";
+
+// getFile();
 
 interface TableIF {
   course: {
@@ -17,10 +31,24 @@ interface TableIF {
   category: "Product Design" | "Programming" | "Marketing";
 }
 
-const table: TableIF[] = [
+// const table = createTable()
+
+// const { data: tableData, error } = useQuery<Models.Document[]>({
+//   queryKey: ["courses"],
+//   queryFn: async () => {
+//     return await getData({
+//       collection: "courses",
+//       query: [],
+//     });
+//   },
+// });
+
+// watchEffect(() => console.log(toRaw(tableData.value)));
+
+const tableData: TableIF[] = reactive([
   {
     course: {
-      image: "/icons/last-course-1.svg",
+      image: urlFileStorage("682c3b350001c9891acf"),
       title: "Design Interview",
       subtitle: "Beginners",
     },
@@ -63,7 +91,42 @@ const table: TableIF[] = [
     dateCreated: new Date("2024-06-30"),
     category: "Programming",
   },
-];
+]);
+
+// const safeTableData = reactive(data ?? []);
+
+const tableInstance = useVueTable({
+  data: tableData,
+  columns: [
+    {
+      accessorKey: "course",
+      header: "Course",
+      cell: (info) => info.row.original.course,
+    },
+    {
+      accessorKey: "dateCreated",
+      header: "Date Created",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: "action",
+      header: "Action",
+      cell: (info) => info.getValue(),
+    },
+  ],
+  getCoreRowModel: getCoreRowModel(),
+});
+
+function log(cell: any) {
+  const course = cell.getValue() as TableIF["course"];
+  console.log("Course:", course); // ✅ Akan tampil di console
+  return course;
+}
 </script>
 
 <template>
@@ -83,21 +146,27 @@ const table: TableIF[] = [
       <table class="w-max md:w-full">
         <thead>
           <tr>
-            <th class="text-start">Course</th>
+            <!-- <th class="text-start">Course</th>
             <th>Date Created</th>
             <th>Category</th>
-            <th>Action</th>
+            <th>Action</th> -->
+            <th
+              v-for="header in tableInstance.getHeaderGroups()[0].headers"
+              :key="header.id"
+            >
+              {{ header.column.columnDef.header }}
+            </th>
           </tr>
         </thead>
 
         <tbody>
-          <tr v-for="(row, index) in table">
+          <!-- <tr v-for="(row, index) in table">
             <td>
               <div class="flex items-center gap-4">
                 <img
                   :src="row.course.image"
                   alt=""
-                  class="w-[50px] md:w-[64px]"
+                  class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                 />
                 <div class="flex-col-1">
                   <h4 class="text-18 font-bold text-black">
@@ -128,6 +197,64 @@ const table: TableIF[] = [
                 <p class="">Edit Course</p>
                 <p class="text-red">Delete</p>
               </TableSelectAction>
+            </td>
+          </tr> -->
+
+          <tr v-for="row in tableInstance.getRowModel().rows" :key="row.id">
+            <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id">
+              <template v-if="cell.column.id === 'course'">
+                <div class="flex items-center gap-4">
+                  <img
+                    :src="(cell.getValue() as TableIF['course']).image"
+                    alt=""
+                    class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
+                  />
+                  <div class="flex-col-1">
+                    <h4 class="text-18 font-bold text-black">
+                      {{ (cell.getValue() as TableIF["course"]).title }}
+                    </h4>
+                    <p class="text-16 text-gray text-start font-normal">
+                      {{ (cell.getValue() as TableIF["course"]).subtitle }}
+                    </p>
+                  </div>
+                </div>
+              </template>
+
+              <template v-else-if="cell.column.id === 'dateCreated'">
+                {{
+                  dayjs(cell.getValue() as TableIF["dateCreated"]).format(
+                    "DD MMMM YYYY"
+                  )
+                }}
+              </template>
+
+              <template v-else-if="cell.column.id === 'category'">
+                <CategoryBadge
+                  :category="(cell.getValue() as TableIF['category'])"
+                />
+              </template>
+
+              <template v-else-if="cell.column.id === 'action'">
+                <TableSelectAction
+                  :direction="`${index > 3 ? 'top' : 'bottom'}`"
+                >
+                  <RouterLink
+                    :to="{
+                      name: 'manage-course',
+                      params: { courseId: cell.id },
+                    }"
+                    class=""
+                    >Manage</RouterLink
+                  >
+                  <RouterLink
+                    :to="{ name: 'student', params: { courseId: cell.id } }"
+                    class=""
+                    >Students</RouterLink
+                  >
+                  <p class="">Edit Course</p>
+                  <p class="text-red">Delete</p>
+                </TableSelectAction>
+              </template>
             </td>
           </tr>
         </tbody>

@@ -2,7 +2,7 @@ import { ID } from "appwrite";
 import { databases } from "./config";
 import type { CollectionUserIF } from "../interface/databaseCollection";
 
-type collection = "users";
+type collection = "users" | "courses";
 // type roles = "students" | "teachers";
 
 const databaseId = "682982930002cafc9b6d";
@@ -15,6 +15,10 @@ const collections: {
   users: {
     name: "users",
     collectionId: "682982c5001ed4dc5ef5",
+  },
+  courses: {
+    name: "courses",
+    collectionId: "682c31c00025f30fcc2b",
   },
 };
 
