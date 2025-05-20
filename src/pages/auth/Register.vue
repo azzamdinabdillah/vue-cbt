@@ -3,11 +3,15 @@ import { ref } from "vue";
 import Button from "../../components/Button.vue";
 import InputGroup from "../../components/InputGroup.vue";
 import type { CollectionUserIF } from "../../interface/databaseCollection";
-import { createData } from "../../appwrite/api";
+import { createData, getData } from "../../appwrite/api";
 import { useMutation } from "@tanstack/vue-query";
 import { useForm } from "vee-validate";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
+import { Query } from "appwrite";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const schema = z.object({
   name: z.string().min(1, "Name is required").min(3, "Minimum 3 characters"),
@@ -38,15 +42,27 @@ const onSubmit = handleSubmit(async (data) => {
 
 const { isPending, error, mutate } = useMutation({
   mutationFn: async (datas: CollectionUserIF) => {
-    return await createData({
+    const checkEmail = await getData({
       collection: "users",
-      datas: datas,
+      query: [Query.equal("email", datas.email)],
     });
+
+    if (checkEmail.length > 0) {
+      throw new Error("Email has been registered, please login directly");
+    } else {
+      const create = await createData({
+        collection: "users",
+        datas: datas,
+      });
+
+      return create;
+    }
   },
 
   onSuccess: () => {
     resetForm();
     confirmPassword.value = "";
+    router.push({ name: "login" });
   },
 });
 </script>
