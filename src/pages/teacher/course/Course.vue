@@ -93,7 +93,7 @@ const tableInstance = useVueTable({
       </template>
     </Title>
 
-    <div class="overflow-x-scroll overflow-y-visible md:overflow-visible w-full pb-6 lg:pb-0">
+    <div class="overflow-x-auto md:overflow-visible w-full pb-6 lg:pb-0">
       <table class="w-max md:w-full">
         <thead>
           <tr>
@@ -138,10 +138,10 @@ const tableInstance = useVueTable({
                     class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                   />
                   <div class="flex-col-1">
-                    <h4 class="text-18 font-bold text-black">
+                    <h4 class="text-18 font-bold text-black capitalize">
                       {{ (cell.getValue() as TableIF["course"]).title }}
                     </h4>
-                    <p class="text-16 text-gray text-start font-normal">
+                    <p class="text-16 text-gray text-start font-normal capitalize">
                       {{ (cell.getValue() as TableIF["course"]).subtitle }}
                     </p>
                   </div>
@@ -164,9 +164,7 @@ const tableInstance = useVueTable({
 
               <template v-else-if="cell.column.id === 'action'">
                 <TableSelectAction
-                  :direction="`${
-                    index >= tableData2.length - 3 ? 'top' : 'bottom'
-                  }`"
+                  direction="bottom"
                 >
                   <RouterLink
                     :to="{
