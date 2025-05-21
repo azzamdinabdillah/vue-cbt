@@ -6,15 +6,9 @@ import Pagination from "../../../components/Pagination.vue";
 import TableSelectAction from "../../../components/TableSelectAction.vue";
 import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
-import { getFile, urlFileStorage } from "../../../appwrite/storage";
-import {
-  createColumnHelper,
-  createTable,
-  FlexRender,
-  getCoreRowModel,
-  useVueTable,
-} from "@tanstack/vue-table";
-import { computed, reactive, toRaw, watchEffect } from "vue";
+import { urlFileStorage } from "../../../appwrite/storage";
+import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
+import { ref, watchEffect } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getData } from "../../../appwrite/api";
 import type { Models } from "appwrite";
@@ -33,70 +27,33 @@ interface TableIF {
 
 // const table = createTable()
 
-// const { data: tableData, error } = useQuery<Models.Document[]>({
-//   queryKey: ["courses"],
-//   queryFn: async () => {
-//     return await getData({
-//       collection: "courses",
-//       query: [],
-//     });
-//   },
-// });
+const { data, error, isPending } = useQuery<Models.Document[]>({
+  queryKey: ["courses"],
+  queryFn: async () => {
+    return await getData({
+      collection: "courses",
+      query: [],
+    });
+  },
+});
 
-// watchEffect(() => console.log(toRaw(tableData.value)));
-
-const tableData: TableIF[] = reactive([
-  {
-    course: {
-      image: urlFileStorage("682c3b350001c9891acf"),
-      title: "Design Interview",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-08-22"),
-    category: "Product Design",
-  },
-  {
-    course: {
-      image: "/icons/last-course-2.svg",
-      title: "Intro to Full-Stack",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-03-11"),
-    category: "Programming",
-  },
-  {
-    course: {
-      image: "/icons/last-course-3.svg",
-      title: "Digital Marketing 101",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-03-11"),
-    category: "Marketing",
-  },
-  {
-    course: {
-      image: "/icons/last-course-4.svg",
-      title: "Usability-Testing",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-06-30"),
-    category: "Product Design",
-  },
-  {
-    course: {
-      image: "/icons/last-course-5.svg",
-      title: "Web Development",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-06-30"),
-    category: "Programming",
-  },
-]);
-
-// const safeTableData = reactive(data ?? []);
+const tableData2 = ref<TableIF[]>([]);
+watchEffect(() => {
+  if (data.value) {
+    tableData2.value = data.value.map((item) => ({
+      course: {
+        image: item.image,
+        title: item.name,
+        subtitle: item.level,
+      },
+      dateCreated: new Date(item.$createdAt),
+      category: item.category,
+    }));
+  }
+});
 
 const tableInstance = useVueTable({
-  data: tableData,
+  data: tableData2,
   columns: [
     {
       accessorKey: "course",
@@ -121,12 +78,6 @@ const tableInstance = useVueTable({
   ],
   getCoreRowModel: getCoreRowModel(),
 });
-
-function log(cell: any) {
-  const course = cell.getValue() as TableIF["course"];
-  console.log("Course:", course); // ✅ Akan tampil di console
-  return course;
-}
 </script>
 
 <template>
@@ -142,17 +93,17 @@ function log(cell: any) {
       </template>
     </Title>
 
-    <div class="overflow-x-auto overflow-y-hidden w-full pb-6 lg:pb-0">
+    <div class="overflow-x-scroll overflow-y-visible md:overflow-visible w-full pb-6 lg:pb-0">
       <table class="w-max md:w-full">
         <thead>
           <tr>
-            <!-- <th class="text-start">Course</th>
-            <th>Date Created</th>
-            <th>Category</th>
-            <th>Action</th> -->
             <th
-              v-for="header in tableInstance.getHeaderGroups()[0].headers"
+              v-for="(header, index) in tableInstance.getHeaderGroups()[0]
+                .headers"
               :key="header.id"
+              :class="{
+                'text-start': index === 0,
+              }"
             >
               {{ header.column.columnDef.header }}
             </th>
@@ -160,52 +111,29 @@ function log(cell: any) {
         </thead>
 
         <tbody>
-          <!-- <tr v-for="(row, index) in table">
-            <td>
-              <div class="flex items-center gap-4">
-                <img
-                  :src="row.course.image"
-                  alt=""
-                  class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
-                />
-                <div class="flex-col-1">
-                  <h4 class="text-18 font-bold text-black">
-                    {{ row.course.title }}
-                  </h4>
-                  <p class="text-16 text-gray text-start font-normal">
-                    {{ row.course.subtitle }}
-                  </p>
-                </div>
-              </div>
+          <tr v-if="error">
+            <td colspan="4" v-if="error">Error : {{ error }}</td>
+          </tr>
+          <tr :key="u" v-for="u in 5" v-else-if="isPending">
+            <td
+              v-for="i in tableInstance.getHeaderGroups()[0].headers.length"
+              :key="i"
+            >
+              <div
+                class="w-[120px] md:w-full h-[30px] rounded-lg animate-pulse bg-gray-100"
+              ></div>
             </td>
-            <td>{{ dayjs(row.dateCreated).format("DD MMMM YYYY") }}</td>
-            <td>
-              <CategoryBadge :category="row.category" />
-            </td>
-            <td>
-              <TableSelectAction :direction="`${index > 3 ? 'top' : 'bottom'}`">
-                <RouterLink
-                  :to="{ name: 'manage-course', params: { courseId: index } }"
-                  class=""
-                  >Manage</RouterLink
-                >
-                <RouterLink
-                  :to="{ name: 'student', params: { courseId: index } }"
-                  class=""
-                  >Students</RouterLink
-                >
-                <p class="">Edit Course</p>
-                <p class="text-red">Delete</p>
-              </TableSelectAction>
-            </td>
-          </tr> -->
-
-          <tr v-for="row in tableInstance.getRowModel().rows" :key="row.id">
+          </tr>
+          <tr
+            v-else
+            v-for="row in tableInstance.getRowModel().rows"
+            :key="row.id"
+          >
             <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id">
               <template v-if="cell.column.id === 'course'">
                 <div class="flex items-center gap-4">
                   <img
-                    :src="(cell.getValue() as TableIF['course']).image"
+                    :src="urlFileStorage((cell.getValue() as TableIF['course']).image)"
                     alt=""
                     class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                   />
@@ -236,7 +164,9 @@ function log(cell: any) {
 
               <template v-else-if="cell.column.id === 'action'">
                 <TableSelectAction
-                  :direction="`${index > 3 ? 'top' : 'bottom'}`"
+                  :direction="`${
+                    index >= tableData2.length - 3 ? 'top' : 'bottom'
+                  }`"
                 >
                   <RouterLink
                     :to="{
@@ -254,6 +184,8 @@ function log(cell: any) {
                   <p class="">Edit Course</p>
                   <p class="text-red">Delete</p>
                 </TableSelectAction>
+                <!-- <Teleport to="body">
+                </Teleport> -->
               </template>
             </td>
           </tr>
@@ -265,8 +197,6 @@ function log(cell: any) {
       <Pagination v-for="i in 5" :page="i" :isActive="i === 3 ? true : false" />
     </div>
   </div>
-
-  <RouterView></RouterView>
 </template>
 
 <style scoped>
