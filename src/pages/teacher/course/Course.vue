@@ -8,76 +8,98 @@ import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
 import { urlFileStorage } from "../../../appwrite/storage";
 import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
-import { ref, watchEffect } from "vue";
-import { useQuery } from "@tanstack/vue-query";
-import { getData } from "../../../appwrite/api";
-import type { Models } from "appwrite";
+import { computed } from "vue";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
+import { deleteData, getData } from "../../../appwrite/api";
+import type { CollectionCourseIF } from "../../../interface/databaseCollection";
+import type { Category } from "../../../interface/commonType";
 
-// getFile();
+const queryClient = useQueryClient();
+const { mutate: deleteCourseMutate, isPending: loadingDeleteCourse } =
+  useMutation({
+    mutationFn: async (documentId: string) => {
+      return await deleteData({
+        collection: "courses",
+        documentId: documentId,
+      });
+    },
+  });
 
-interface TableIF {
-  course: {
-    image: string;
-    title: string;
-    subtitle: string;
-  };
-  dateCreated: Date;
-  category: "Product Design" | "Programming" | "Marketing";
-}
+// interface TableIF {
+//   id: string;
+//   course: {
+//     image: string;
+//     name: string;
+//     level: string;
+//   };
+//   dateCreated: Date;
+//   category: Category;
+// }
 
-// const table = createTable()
-
-const { data, error, isPending } = useQuery<Models.Document[]>({
+const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
   queryKey: ["courses"],
   queryFn: async () => {
-    return await getData({
+    const datas = await getData({
       collection: "courses",
       query: [],
+    });
+
+    return datas.map((item): CollectionCourseIF => {
+      return {
+        id: item.$id,
+        name: item.name,
+        category: item.category,
+        level: item.level,
+        image: item.image,
+        created_at: new Date(item.$createdAt),
+      };
     });
   },
 });
 
-const tableData2 = ref<TableIF[]>([]);
-watchEffect(() => {
-  if (data.value) {
-    tableData2.value = data.value.map((item) => ({
-      course: {
-        image: item.image,
-        title: item.name,
-        subtitle: item.level,
-      },
-      dateCreated: new Date(item.$createdAt),
-      category: item.category,
-    }));
-  }
-});
+// const tableData2 = ref<TableIF[]>([]);
+// watchEffect(() => {
+//   if (data.value) {
+//     tableData2.value = data.value.map((item) => ({
+//       id: item.$id,
+//       course: {
+//         image: item.image,
+//         name: item.name,
+//         level: item.level,
+//       },
+//       dateCreated: new Date(item.$createdAt),
+//       category: item.category,
+//     }));
+//   }
+// });
 
 const tableInstance = useVueTable({
-  data: tableData2,
+  data: computed(() => data.value ?? []),
   columns: [
     {
       accessorKey: "course",
       header: "Course",
-      cell: (info) => info.row.original.course,
     },
     {
       accessorKey: "dateCreated",
       header: "Date Created",
-      cell: (info) => info.getValue(),
     },
     {
       accessorKey: "category",
       header: "Category",
-      cell: (info) => info.getValue(),
     },
     {
       accessorKey: "action",
       header: "Action",
-      cell: (info) => info.getValue(),
     },
   ],
   getCoreRowModel: getCoreRowModel(),
 });
+
+function deleteCourse(documentId: string) {
+  deleteCourseMutate(documentId);
+  queryClient.invalidateQueries({ queryKey: ["courses"] });
+}
 </script>
 
 <template>
@@ -129,61 +151,70 @@ const tableInstance = useVueTable({
             v-for="row in tableInstance.getRowModel().rows"
             :key="row.id"
           >
-            <td v-for="(cell) in row.getVisibleCells()" :key="cell.id">
+            <td v-for="cell in row.getVisibleCells()" :key="cell.id">
               <template v-if="cell.column.id === 'course'">
                 <div class="flex items-center gap-4">
                   <img
-                    :src="urlFileStorage((cell.getValue() as TableIF['course']).image)"
+                    :src="urlFileStorage(cell.row.original.image)"
                     alt=""
                     class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                   />
                   <div class="flex-col-1">
                     <h4 class="text-18 font-bold text-black capitalize">
-                      {{ (cell.getValue() as TableIF["course"]).title }}
+                      {{ cell.row.original.name }}
                     </h4>
-                    <p class="text-16 text-gray text-start font-normal capitalize">
-                      {{ (cell.getValue() as TableIF["course"]).subtitle }}
+                    <p
+                      class="text-16 text-gray text-start font-normal capitalize"
+                    >
+                      {{ cell.row.original.level }}
                     </p>
                   </div>
                 </div>
               </template>
 
               <template v-else-if="cell.column.id === 'dateCreated'">
-                {{
-                  dayjs(cell.getValue() as TableIF["dateCreated"]).format(
-                    "DD MMMM YYYY"
-                  )
-                }}
+                {{ dayjs(cell.row.original.created_at).format("DD MMMM YYYY") }}
               </template>
 
               <template v-else-if="cell.column.id === 'category'">
                 <CategoryBadge
-                  :category="(cell.getValue() as TableIF['category'])"
-                />
+                  :category="cell.row.original.category as Category"
+                ></CategoryBadge>
               </template>
 
               <template v-else-if="cell.column.id === 'action'">
-                <TableSelectAction
-                  direction="bottom"
-                >
+                <TableSelectAction direction="bottom">
                   <RouterLink
                     :to="{
                       name: 'manage-course',
-                      params: { courseId: cell.id },
+                      params: {
+                        courseId: cell.id,
+                      },
                     }"
                     class=""
                     >Manage</RouterLink
                   >
                   <RouterLink
-                    :to="{ name: 'student', params: { courseId: cell.id } }"
+                    :to="{
+                      name: 'student',
+                      params: {
+                        courseId: cell.id,
+                      },
+                    }"
                     class=""
                     >Students</RouterLink
                   >
                   <p class="">Edit Course</p>
-                  <p class="text-red">Delete</p>
+                  <p
+                    @click="() => deleteCourse(cell.row.original.id ?? '')"
+                    :class="[
+                      'text-red',
+                      loadingDeleteCourse ? 'opacity-50' : '',
+                    ]"
+                  >
+                    {{ loadingDeleteCourse ? "wait..." : "Delete" }}
+                  </p>
                 </TableSelectAction>
-                <!-- <Teleport to="body">
-                </Teleport> -->
               </template>
             </td>
           </tr>

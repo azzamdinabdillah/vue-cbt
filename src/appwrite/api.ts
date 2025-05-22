@@ -1,6 +1,9 @@
 import { ID } from "appwrite";
 import { databases } from "./config";
-import type { CollectionCourseIF, CollectionUserIF } from "../interface/databaseCollection";
+import type {
+  CollectionCourseIF,
+  CollectionUserIF,
+} from "../interface/databaseCollection";
 
 type collection = "users" | "courses";
 // type roles = "students" | "teachers";
@@ -55,6 +58,26 @@ export async function createData({
       collections[collection].collectionId,
       ID.unique(),
       datas
+    );
+
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteData({
+  collection,
+  documentId,
+}: {
+  collection: collection;
+  documentId: string;
+}) {
+  try {
+    const result = await databases.deleteDocument(
+      databaseId,
+      collections[collection].collectionId,
+      documentId
     );
 
     return result;

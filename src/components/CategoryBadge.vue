@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Category } from '../interface/commonType';
+
 defineProps<{
-  category: "Design" | "Programming" | "Marketing";
+  category: Category;
 }>();
 
 const variant: Record<string, string> = {

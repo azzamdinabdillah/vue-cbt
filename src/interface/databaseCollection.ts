@@ -9,6 +9,7 @@ export interface CollectionUserIF {
 }
 
 export interface CollectionCourseIF {
+  id?: string;
   name: string;
   category: string;
   level: string;
