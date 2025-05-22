@@ -195,7 +195,7 @@ function imageOnChange(e: Event) {
         :option="[...LEVELS]"
       />
 
-      <div class="flex gap-2.5">
+      <!-- <div class="flex gap-2.5">
         <input id="aggree" type="checkbox" class="checkbox-style" />
         <label
           for="aggree"
@@ -203,7 +203,7 @@ function imageOnChange(e: Event) {
         >
           I have read terms and conditions
         </label>
-      </div>
+      </div> -->
 
       <Button
         :disabled="isCoursePending || isUploadPending"

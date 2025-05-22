@@ -56,7 +56,7 @@ const isOpen = ref(false);
           />
         </div>
 
-        <p class="text-12 text-red font-medium">{{ error }}</p>
+        <p v-if="error" class="text-12 text-red font-medium">{{ error }}</p>
       </div>
 
       <div
