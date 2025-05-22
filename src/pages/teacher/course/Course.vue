@@ -129,7 +129,7 @@ const tableInstance = useVueTable({
             v-for="row in tableInstance.getRowModel().rows"
             :key="row.id"
           >
-            <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id">
+            <td v-for="(cell) in row.getVisibleCells()" :key="cell.id">
               <template v-if="cell.column.id === 'course'">
                 <div class="flex items-center gap-4">
                   <img

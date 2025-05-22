@@ -1,10 +1,10 @@
 <script setup lang="ts">
 defineProps<{
-  category: "Product Design" | "Programming" | "Marketing";
+  category: "Design" | "Programming" | "Marketing";
 }>();
 
 const variant: Record<string, string> = {
-  "Product Design": "bg-[#FFF2E6] text-[#F6770B]",
+  Design: "bg-[#FFF2E6] text-[#F6770B]",
   Programming: "bg-[#EAE8FE] text-[#6436F1]",
   Marketing: "bg-[#D5EFFE] text-[#066DFE]",
 };

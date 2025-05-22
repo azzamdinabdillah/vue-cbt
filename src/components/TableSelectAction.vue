@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref } from "vue";
+import { ref } from "vue";
 
 defineProps<{
   direction: "top" | "bottom";
@@ -11,17 +11,18 @@ const style = ref({
   width: 0,
 });
 
-function toggleMenu() {
+function toggleMenu(e: MouseEvent) {
   isOpen.value = !isOpen.value;
-  nextTick(() => {
-    const menu = document.querySelector(".menu-text")?.getBoundingClientRect();
-    if (!menu) return;
-    style.value = {
-      top: menu.top - 1 + window.scrollY,
-      left: menu.left + window.scrollX,
-      width: menu.width,
-    };
-  });
+  const menu = (e.currentTarget as HTMLElement)
+    .querySelector(".menu-text")
+    ?.getBoundingClientRect();
+
+  if (!menu) return;
+  style.value = {
+    top: menu.top - 1 + window.scrollY,
+    left: menu.left + window.scrollX,
+    width: menu.width,
+  };
 }
 </script>
 

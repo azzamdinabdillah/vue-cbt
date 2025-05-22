@@ -22,6 +22,7 @@ const variantClass = {
 
 <template>
   <button
+    v-bind="$attrs"
     :type="type"
     :class="`${variantClass[variant]} ${
       shadow ? 'shadow' : ''

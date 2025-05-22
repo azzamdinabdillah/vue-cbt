@@ -1,6 +1,6 @@
 import { ID } from "appwrite";
 import { databases } from "./config";
-import type { CollectionUserIF } from "../interface/databaseCollection";
+import type { CollectionCourseIF, CollectionUserIF } from "../interface/databaseCollection";
 
 type collection = "users" | "courses";
 // type roles = "students" | "teachers";
@@ -47,7 +47,7 @@ export async function createData({
   datas,
 }: {
   collection: collection;
-  datas: CollectionUserIF;
+  datas: CollectionUserIF | CollectionCourseIF;
 }) {
   try {
     const result = await databases.createDocument(

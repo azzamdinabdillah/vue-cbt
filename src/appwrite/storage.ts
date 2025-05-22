@@ -5,18 +5,26 @@ const client = new Client()
   .setProject("682978c4002ff585753c");
 
 const storage = new Storage(client);
+const bucketId = "682c2fb0001659940227";
 
 export async function getFile() {
   try {
-    const file = await storage.getFile(
-      "682c2fb0001659940227",
-      "682c3b350001c9891acf"
-    );
+    const file = await storage.getFile(bucketId, "682c3b350001c9891acf");
     console.log(file);
 
     return file;
-  } catch (error) {
-    console.error("Error fetching file:", error);
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function uploadFile(file: File) {
+  try {
+    const upload = await storage.createFile(bucketId, "unique()", file);
+
+    return upload.$id;
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 }
 

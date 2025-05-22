@@ -8,6 +8,7 @@ withDefaults(
     option: string[];
     label?: string;
     direction?: "top" | "bottom";
+    error?: string;
   }>(),
   {
     icon: "/icons/placeholder.svg",
@@ -17,37 +18,45 @@ withDefaults(
   }
 );
 
+const modelValue = defineModel<string>();
+
 const isOpen = ref(false);
-const selected = ref("");
+// const selected = ref("");
 </script>
 
 <template>
   <div class="flex flex-col gap-2">
     <h5 class="text-16 font-semibold text-black">{{ label }}</h5>
     <div class="relative">
-      <div
-        @click="isOpen = !isOpen"
-        :class="[
-          'top cursor-pointer flex justify-between transition-all items-center py-3 md:py-3.5 px-4 rounded-full',
-          isOpen ? 'border-shadow-active-black' : 'border-shadow-gray',
-        ]"
-      >
-        <div class="flex items-center gap-3.5">
-          <img :src="icon" alt="" />
-          <p
-            :class="[
-              'text-16',
-              selected ? 'text-black font-semibold' : 'text-gray font-normal',
-            ]"
-          >
-            {{ selected ? selected : placeholder }}
-          </p>
+      <div class="flex flex-col gap-3">
+        <div
+          @click="isOpen = !isOpen"
+          :class="[
+            'top cursor-pointer flex justify-between transition-all items-center py-3 md:py-3.5 px-4 rounded-full',
+            isOpen ? 'border-shadow-active-black' : 'border-shadow-gray',
+          ]"
+        >
+          <div class="flex items-center gap-3.5">
+            <img :src="icon" alt="" />
+            <p
+              :class="[
+                'text-16',
+                modelValue
+                  ? 'text-black font-semibold'
+                  : 'text-gray font-normal',
+              ]"
+            >
+              {{ modelValue ? modelValue : placeholder }}
+            </p>
+          </div>
+          <img
+            :class="['transition-all', isOpen ? 'rotate-180' : '']"
+            src="/icons/arrow-down.svg"
+            alt=""
+          />
         </div>
-        <img
-          :class="['transition-all', isOpen ? 'rotate-180' : '']"
-          src="/icons/arrow-down.svg"
-          alt=""
-        />
+
+        <p class="text-12 text-red font-medium">{{ error }}</p>
       </div>
 
       <div
@@ -62,10 +71,11 @@ const selected = ref("");
         <div
           @click="
             () => {
-              selected = i;
+              modelValue = i;
               isOpen = false;
             }
           "
+          v-bind="$attrs"
           class="group text-16 text-black font-semibold cursor-pointer w-full"
           v-for="i in option"
         >

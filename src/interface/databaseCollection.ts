@@ -7,3 +7,11 @@ export interface CollectionUserIF {
   created_at: Date;
   confirmPassword?: string;
 }
+
+export interface CollectionCourseIF {
+  name: string;
+  category: string;
+  level: string;
+  image: string;
+  created_at: Date;
+}
