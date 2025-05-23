@@ -23,18 +23,8 @@ const { mutate: deleteCourseMutate, isPending: loadingDeleteCourse } =
         documentId: documentId,
       });
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["courses"] }),
   });
-
-// interface TableIF {
-//   id: string;
-//   course: {
-//     image: string;
-//     name: string;
-//     level: string;
-//   };
-//   dateCreated: Date;
-//   category: Category;
-// }
 
 const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
   queryKey: ["courses"],
@@ -56,22 +46,6 @@ const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
     });
   },
 });
-
-// const tableData2 = ref<TableIF[]>([]);
-// watchEffect(() => {
-//   if (data.value) {
-//     tableData2.value = data.value.map((item) => ({
-//       id: item.$id,
-//       course: {
-//         image: item.image,
-//         name: item.name,
-//         level: item.level,
-//       },
-//       dateCreated: new Date(item.$createdAt),
-//       category: item.category,
-//     }));
-//   }
-// });
 
 const tableInstance = useVueTable({
   data: computed(() => data.value ?? []),
@@ -98,7 +72,6 @@ const tableInstance = useVueTable({
 
 function deleteCourse(documentId: string) {
   deleteCourseMutate(documentId);
-  queryClient.invalidateQueries({ queryKey: ["courses"] });
 }
 </script>
 
