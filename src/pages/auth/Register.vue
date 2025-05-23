@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import Button from "../../components/Button.vue";
 import InputGroup from "../../components/InputGroup.vue";
 import type { CollectionUserIF } from "../../interface/databaseCollection";
@@ -10,8 +10,10 @@ import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { Query } from "appwrite";
 import { useRouter } from "vue-router";
+import type { ToastIF } from "../../interface/commonInterface";
 
 const router = useRouter();
+const toast = inject<ToastIF>("toast")!;
 
 const schema = z.object({
   name: z.string().min(1, "Name is required").min(3, "Minimum 3 characters"),
@@ -61,6 +63,7 @@ const { isPending, error, mutate } = useMutation({
 
   onSuccess: () => {
     resetForm();
+    toast.open("Registration successful, please login", "success");
     confirmPassword.value = "";
     router.push({ name: "login" });
   },
