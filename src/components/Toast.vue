@@ -14,7 +14,14 @@ defineProps<{
     ]"
   >
     <div class="flex flex-col">
-      <h1 class="text-14 font-medium text-gray capitalize">{{ status }} :</h1>
+      <h1
+        :class="[
+          'text-14 font-semibold capitalize',
+          status === 'error' ? 'text-red' : 'text-green',
+        ]"
+      >
+        {{ status }} :
+      </h1>
       <p class="text-black font-medium text-16">{{ message }}</p>
     </div>
     <button

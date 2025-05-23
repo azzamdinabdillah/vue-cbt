@@ -64,9 +64,11 @@ const schema = z.object({
     ),
 });
 
-const { errors, handleSubmit, defineField, setFieldValue, resetForm } = useForm({
-  validationSchema: toTypedSchema(schema),
-});
+const { errors, handleSubmit, defineField, setFieldValue, resetForm } = useForm(
+  {
+    validationSchema: toTypedSchema(schema),
+  }
+);
 
 const [name, nameAttr] = defineField("name");
 const [category, categoryAttr] = defineField("category");
@@ -85,8 +87,8 @@ const onSubmit = handleSubmit(async (data) => {
 
     toast.open("Course created successfully", "success");
     resetForm();
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    toast.open(`${error.message}`, "error");
   }
 });
 
