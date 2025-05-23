@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { getData } from "../../../appwrite/api";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
-import { computed, watchEffect } from "vue";
+import { computed } from "vue";
 import { Query } from "appwrite";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import { urlFileStorage } from "../../../appwrite/storage";
@@ -18,7 +18,9 @@ const { data: courseData } = useQuery({
   },
 });
 
-const { data: lastCourse, isPending: lastCourseLoading } = useQuery<CollectionCourseIF[]>({
+const { data: lastCourse, isPending: lastCourseLoading } = useQuery<
+  CollectionCourseIF[]
+>({
   queryKey: ["lastCourse"],
   queryFn: async () => {
     const datas = await getData({
@@ -128,7 +130,11 @@ const lastStudentsAdded = [
         <h1 class="text-18 text-black font-bold">Last Courses Added</h1>
 
         <div class="flex flex-col gap-5" v-if="lastCourseLoading">
-          <div v-for="i in 3" :key="i" class="flex items-center gap-4 animate-pulse">
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="flex items-center gap-4 animate-pulse"
+          >
             <div
               alt=""
               class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full bg-gray-200"

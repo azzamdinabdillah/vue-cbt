@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
@@ -18,6 +18,9 @@ import { useMutation } from "@tanstack/vue-query";
 import { uploadFile } from "../../../../appwrite/storage";
 import { createData } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
+import type { ToastIF } from "../../../../interface/commonInterface";
+
+const toast = inject<ToastIF>("toast")!;
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const image = ref<File | null>(null);
@@ -61,7 +64,7 @@ const schema = z.object({
     ),
 });
 
-const { errors, handleSubmit, defineField, setFieldValue } = useForm({
+const { errors, handleSubmit, defineField, setFieldValue, resetForm } = useForm({
   validationSchema: toTypedSchema(schema),
 });
 
@@ -79,6 +82,9 @@ const onSubmit = handleSubmit(async (data) => {
       level: data.level,
       created_at: new Date(),
     });
+
+    toast.open("Course created successfully", "success");
+    resetForm();
   } catch (error) {
     console.log(error);
   }

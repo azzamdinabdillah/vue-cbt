@@ -8,11 +8,14 @@ import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
 import { urlFileStorage } from "../../../appwrite/storage";
 import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { deleteData, getData } from "../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import type { Category } from "../../../interface/commonType";
+import type { ToastIF } from "../../../interface/commonInterface";
+
+const toast = inject<ToastIF>("toast")!;
 
 const queryClient = useQueryClient();
 const { mutate: deleteCourseMutate, isPending: loadingDeleteCourse } =
@@ -23,7 +26,10 @@ const { mutate: deleteCourseMutate, isPending: loadingDeleteCourse } =
         documentId: documentId,
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["courses"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.open("Course deleted successfully", "success");
+    },
   });
 
 const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
@@ -133,7 +139,7 @@ function deleteCourse(documentId: string) {
                     class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                   />
                   <div class="flex-col-1">
-                    <h4 class="text-18 font-bold text-black capitalize">
+                    <h4 class="text-18 font-bold text-black capitalize text-start">
                       {{ cell.row.original.name }}
                     </h4>
                     <p
