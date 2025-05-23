@@ -7,9 +7,20 @@ const client = new Client()
 const storage = new Storage(client);
 const bucketId = "682c2fb0001659940227";
 
-export async function getFile() {
+export async function getFileAsFile(fileId: string) {
   try {
-    const file = await storage.getFile(bucketId, "682c3b350001c9891acf");
+    const res: any = await storage.getFileView(bucketId, fileId);
+    return res;
+  } catch (error: any) {
+    console.log(error);
+
+    throw new Error(error.message);
+  }
+}
+
+export async function getFile(fileId: string) {
+  try {
+    const file = await storage.getFile(bucketId, fileId);
     console.log(file);
 
     return file;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, watchEffect } from "vue";
+import { computed, inject, ref, toRaw, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
@@ -15,7 +15,11 @@ import {
   type Level,
 } from "../../../../interface/commonType";
 import { useMutation, useQuery } from "@tanstack/vue-query";
-import { uploadFile } from "../../../../appwrite/storage";
+import {
+  getFile,
+  getFileAsFile,
+  uploadFile,
+} from "../../../../appwrite/storage";
 import { createData, getSingleData } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
@@ -100,6 +104,17 @@ const { data: singleCourse } = useQuery({
   },
 });
 
+// const { data: singleImageCourse } = useQuery({
+//   enabled: computed(() => !!singleCourse.value?.image),
+//   queryKey: ["singleImageCourse"],
+//   queryFn: async (): Promise<any> => {
+//     if (!singleCourse.value?.image) {
+//       throw new Error("Image not found");
+//     }
+//     return await getFileAsFile(singleCourse.value.image, "original", "jpg");
+//   },
+// });
+
 watchEffect(() => {
   if (singleCourse.value) {
     setValues({
@@ -107,6 +122,8 @@ watchEffect(() => {
       level: singleCourse.value.level,
       name: singleCourse.value.name,
     });
+
+    // console.log(singleImageCourse.value);
   }
 });
 
@@ -207,7 +224,6 @@ function imageOnChange(e: Event) {
       </div>
 
       <InputGroup
-        :value="singleCourse?.name"
         :error="errors.name"
         :required="true"
         v-model="name"
