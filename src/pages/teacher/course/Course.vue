@@ -188,7 +188,11 @@ function deleteCourse(documentId: string) {
                     class=""
                     >Students</RouterLink
                   >
-                  <p class="">Edit Course</p>
+                  <RouterLink
+                    :to="`/course/edit-course/${cell.row.original.id}`"
+                    class=""
+                    >Edit Course</RouterLink
+                  >
                   <p
                     @click="() => deleteCourse(cell.row.original.id ?? '')"
                     :class="[

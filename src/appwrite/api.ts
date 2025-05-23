@@ -25,6 +25,26 @@ const collections: {
   },
 };
 
+export async function getSingleData({
+  collection,
+  documentId,
+}: {
+  collection: collection;
+  documentId: string;
+}) {
+  try {
+    const result = await databases.getDocument(
+      databaseId,
+      collections[collection].collectionId,
+      documentId
+    );
+
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
 export async function getData({
   collection,
   query,

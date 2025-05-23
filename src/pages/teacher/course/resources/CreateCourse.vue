@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
@@ -14,13 +14,15 @@ import {
   type Category,
   type Level,
 } from "../../../../interface/commonType";
-import { useMutation } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { uploadFile } from "../../../../appwrite/storage";
-import { createData } from "../../../../appwrite/api";
+import { createData, getSingleData } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
+import { useRoute } from "vue-router";
 
 const toast = inject<ToastIF>("toast")!;
+const route = useRoute();
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const image = ref<File | null>(null);
@@ -64,15 +66,49 @@ const schema = z.object({
     ),
 });
 
-const { errors, handleSubmit, defineField, setFieldValue, resetForm } = useForm(
-  {
-    validationSchema: toTypedSchema(schema),
-  }
-);
+const {
+  errors,
+  handleSubmit,
+  defineField,
+  setFieldValue,
+  resetForm,
+  setValues,
+} = useForm({
+  validationSchema: toTypedSchema(schema),
+});
 
 const [name, nameAttr] = defineField("name");
 const [category, categoryAttr] = defineField("category");
 const [level, levelAttr] = defineField("level");
+
+const { data: singleCourse } = useQuery({
+  queryKey: ["singleCourse"],
+  queryFn: async (): Promise<CollectionCourseIF> => {
+    const datas = await getSingleData({
+      collection: "courses",
+      documentId: route.params.courseId as string,
+    });
+
+    return {
+      id: datas.$id,
+      name: datas.name,
+      category: datas.category,
+      level: datas.level,
+      image: datas.image,
+      created_at: datas.created_at,
+    };
+  },
+});
+
+watchEffect(() => {
+  if (singleCourse.value) {
+    setValues({
+      category: singleCourse.value.category,
+      level: singleCourse.value.level,
+      name: singleCourse.value.name,
+    });
+  }
+});
 
 const onSubmit = handleSubmit(async (data) => {
   try {
@@ -171,6 +207,7 @@ function imageOnChange(e: Event) {
       </div>
 
       <InputGroup
+        :value="singleCourse?.name"
         :error="errors.name"
         :required="true"
         v-model="name"

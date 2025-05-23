@@ -100,6 +100,11 @@ const router = createRouter({
               name: "create-course",
             },
             {
+              path: "edit-course/:courseId",
+              component: CreateCourse,
+              name: "edit-course",
+            },
+            {
               path: "manage-course/:courseId",
               component: ManageCourse,
               name: "manage-course",

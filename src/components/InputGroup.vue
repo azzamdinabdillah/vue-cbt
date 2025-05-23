@@ -8,6 +8,7 @@ defineProps<{
   prefix?: string;
   suffix?: string;
   type?: "text" | "password" | "email" | "number";
+  value?: string;
 }>();
 </script>
 
@@ -24,6 +25,7 @@ defineProps<{
         class="absolute left-4 top-1/2 transform -translate-y-1/2"
       />
       <input
+        :value="value"
         v-model="model"
         :id="id"
         v-bind="$attrs"
