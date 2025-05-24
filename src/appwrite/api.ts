@@ -86,6 +86,29 @@ export async function createData({
   }
 }
 
+export async function updateData({
+  collection,
+  datas,
+  documentId,
+}: {
+  collection: collection;
+  datas: CollectionUserIF | CollectionCourseIF;
+  documentId: string;
+}) {
+  try {
+    const result = await databases.updateDocument(
+      databaseId,
+      collections[collection].collectionId,
+      documentId,
+      datas
+    );
+
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
 export async function deleteData({
   collection,
   documentId,

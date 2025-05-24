@@ -45,6 +45,26 @@ export async function uploadFile(file: File) {
   }
 }
 
+export async function updateFile(fileId: string) {
+  try {
+    const upload = await storage.updateFile(bucketId, fileId);
+
+    return upload.$id;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteFile(fileId: string) {
+  try {
+    const deleteFile = await storage.deleteFile(bucketId, fileId);
+
+    return deleteFile;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
 export function urlFileStorage(fileId: string) {
   return `https://fra.cloud.appwrite.io/v1/storage/buckets/682c2fb0001659940227/files/${fileId}/view?project=682978c4002ff585753c&mode=admin`;
 }

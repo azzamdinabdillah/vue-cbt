@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watchEffect } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
@@ -16,11 +16,17 @@ import {
 } from "../../../../interface/commonType";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import {
+  deleteFile,
   getFile,
+  getFileAsFile,
+  updateFile,
   uploadFile,
-  urlFileStorage,
 } from "../../../../appwrite/storage";
-import { createData, getSingleData } from "../../../../appwrite/api";
+import {
+  createData,
+  getSingleData,
+  updateData,
+} from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
 import { useRoute } from "vue-router";
@@ -113,17 +119,29 @@ const { data: singleImageCourse, isPending: singleImageCourseLoading } =
         throw new Error("Course image not found");
       }
 
-      return await getFile(singleCourse.value.image);
+      const file = await getFileAsFile(singleCourse.value.image ?? "");
+      // const fileId = await getFile(singleCourse.value.image ?? "");
+      return {
+        file,
+        // fileId,
+        urlFile: URL.createObjectURL(file),
+      };
     },
   });
 
-watchEffect(() => {
+watch(singleCourse, () => {
   if (singleCourse.value && route.params.courseId) {
     setValues({
       category: singleCourse.value.category,
       level: singleCourse.value.level,
       name: singleCourse.value.name,
     });
+  }
+});
+
+watch(singleImageCourse, () => {
+  if (singleImageCourse.value) {
+    setFieldValue("image", singleImageCourse.value.file);
   }
 });
 
@@ -135,18 +153,35 @@ onMounted(() => {
 
 const onSubmit = handleSubmit(async (data) => {
   try {
-    const upload = await mutationUpload();
-    await mutationCourse({
-      image: upload,
-      name: data.name,
-      category: data.category,
-      level: data.level,
-      created_at: new Date(),
-    });
+    if (route.params.courseId) {
+      const uploadUpdate = await mutationUploadUpdate();
+      await mutationCourseUpdate({
+        datas: {
+          image: image.value ? uploadUpdate : singleImageCourse.value.fileId,
+          name: data.name,
+          category: data.category,
+          level: data.level,
+          created_at: new Date(),
+        },
+        documentId: route.params.courseId as string,
+      });
+      toast.open("Course updated successfully", "success");
+    } else {
+      const upload = await mutationUpload();
+      await mutationCourse({
+        image: upload,
+        name: data.name,
+        category: data.category,
+        level: data.level,
+        created_at: new Date(),
+      });
 
-    toast.open("Course created successfully", "success");
+      toast.open("Course created successfully", "success");
+    }
     resetForm();
   } catch (error: any) {
+    console.log(error);
+
     toast.open(`${error.message}`, "error");
   }
 });
@@ -170,9 +205,39 @@ const { mutateAsync: mutationCourse, isPending: isCoursePending } = useMutation(
   }
 );
 
+const { mutateAsync: mutationUploadUpdate, isPending: isUploadPendingUpdate } =
+  useMutation({
+    mutationFn: async () => {
+      console.log(singleCourse.value?.image);
+      await deleteFile(singleCourse.value?.image ?? "");
+      const upload = await uploadFile(image.value as File);
+
+      return upload;
+    },
+  });
+
+const { mutateAsync: mutationCourseUpdate, isPending: isCoursePendingUpdate } =
+  useMutation({
+    mutationFn: async ({
+      datas,
+      documentId,
+    }: {
+      datas: CollectionCourseIF;
+      documentId: string;
+    }) => {
+      return await updateData({
+        collection: "courses",
+        datas,
+        documentId,
+      });
+    },
+  });
+
 function imageOnChange(e: Event) {
   const target = e.target as HTMLInputElement;
   if (target.files) {
+    console.log("asdasda");
+
     image.value = target.files[0];
     setFieldValue("image", image.value);
   }
@@ -204,24 +269,38 @@ function imageOnChange(e: Event) {
     >
       <div class="flex flex-col gap-3">
         <div class="flex items-center gap-5">
+          <div
+            class="w-[100px] h-[100px] rounded-full object-cover bg-gray/20 animate-pulse"
+            v-if="route.params.courseId && singleImageCourseLoading"
+          ></div>
           <img
-            v-if="!route.params.courseId"
+            v-else
+            :src="
+              imageUrl
+                ? imageUrl
+                : singleImageCourse?.urlFile
+                ? singleImageCourse?.urlFile
+                : '/images/profile-placeholder.png'
+            "
+            alt=""
+            class="w-[100px] h-[100px] rounded-full object-cover"
+          />
+          <!-- <img
+            v-if="imageUrl || !route.params.courseId"
             :src="imageUrl ? imageUrl : '/images/profile-placeholder.png'"
             alt=""
             class="w-[100px] h-[100px] rounded-full object-cover"
           />
-          <div v-else>
-            <div
-              class="w-[100px] h-[100px] rounded-full object-cover bg-gray/20 animate-pulse"
-              v-if="route.params.courseId && singleImageCourseLoading"
-            ></div>
-            <img
-              class="w-[100px] h-[100px] rounded-full object-cover"
-              v-else
-              :src="urlFileStorage(singleImageCourse.$id)"
-              alt=""
-            />
-          </div>
+          <div
+            class="w-[100px] h-[100px] rounded-full object-cover bg-gray/20 animate-pulse"
+            v-else-if="route.params.courseId && singleImageCourseLoading"
+          ></div>
+          <img
+            class="w-[100px] h-[100px] rounded-full object-cover"
+            v-else
+            :src="urlFileStorage(singleImageCourse.$id)"
+            alt=""
+          /> -->
           <Button
             @click="() => fileInput?.click()"
             type="button"
@@ -239,7 +318,10 @@ function imageOnChange(e: Event) {
           />
         </div>
 
-        <p class="text-12 font-medium text-red" v-if="!route.params.courseId">
+        <!-- <p class="text-12 font-medium text-red">
+          {{ errors.image }}
+        </p> -->
+        <p class="text-12 font-medium text-red">
           {{ errors.image }}
         </p>
       </div>
@@ -295,12 +377,22 @@ function imageOnChange(e: Event) {
       </div> -->
 
       <Button
-        :disabled="isCoursePending || isUploadPending"
+        :disabled="
+          isCoursePending ||
+          isUploadPending ||
+          isCoursePendingUpdate ||
+          isUploadPendingUpdate
+        "
         type="submit"
         variant="blue"
         customClass="w-full"
         >{{
-          isCoursePending || isUploadPending ? "Creating..." : "Create Course"
+          isCoursePending ||
+          isUploadPending ||
+          isCoursePendingUpdate ||
+          isUploadPendingUpdate
+            ? "Loading..."
+            : "Create Course"
         }}</Button
       >
     </form>

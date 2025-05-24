@@ -13,6 +13,6 @@ export interface CollectionCourseIF {
   name: string;
   category: string;
   level: string;
-  image: string;
+  image?: string;
   created_at: Date;
 }
