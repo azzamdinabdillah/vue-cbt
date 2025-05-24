@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, toRaw, watchEffect } from "vue";
+import { computed, inject, onMounted, ref, toRaw, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
@@ -17,8 +17,8 @@ import {
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import {
   getFile,
-  getFileAsFile,
   uploadFile,
+  urlFileStorage,
 } from "../../../../appwrite/storage";
 import { createData, getSingleData } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
@@ -58,7 +58,6 @@ const schema = z.object({
     ),
   image: z
     .instanceof(File, { message: "Image is required" })
-    // .optional()
     .refine((file) => file.size < 2 * 1024 * 1024, {
       message: "Image size must be less than 2MB",
     })
@@ -104,16 +103,18 @@ const { data: singleCourse } = useQuery({
   },
 });
 
-// const { data: singleImageCourse } = useQuery({
-//   enabled: computed(() => !!singleCourse.value?.image),
-//   queryKey: ["singleImageCourse"],
-//   queryFn: async (): Promise<any> => {
-//     if (!singleCourse.value?.image) {
-//       throw new Error("Image not found");
-//     }
-//     return await getFileAsFile(singleCourse.value.image, "original", "jpg");
-//   },
-// });
+const { data: singleImageCourse, isPending: singleImageCourseLoading } =
+  useQuery({
+    enabled: computed(() => !!singleCourse.value),
+    queryKey: computed(() => ["imageCourse", singleCourse.value?.image]),
+    queryFn: async (): Promise<any> => {
+      if (!singleCourse.value) {
+        throw new Error("Course image not found");
+      }
+
+      return await getFile(singleCourse.value.image);
+    },
+  });
 
 watchEffect(() => {
   if (singleCourse.value) {
@@ -122,8 +123,12 @@ watchEffect(() => {
       level: singleCourse.value.level,
       name: singleCourse.value.name,
     });
+  }
+});
 
-    // console.log(singleImageCourse.value);
+onMounted(() => {
+  if (!route.params.courseId) {
+    resetForm();
   }
 });
 
@@ -199,9 +204,20 @@ function imageOnChange(e: Event) {
       <div class="flex flex-col gap-3">
         <div class="flex items-center gap-5">
           <img
+            v-if="imageUrl"
             :src="imageUrl ? imageUrl : '/images/profile-placeholder.png'"
             alt=""
             class="w-[100px] h-[100px] rounded-full object-cover"
+          />
+          <div
+            class="w-[100px] h-[100px] rounded-full object-cover bg-a5 animate-pulse"
+            v-else-if="route.params.courseId && singleImageCourseLoading"
+          ></div>
+          <img
+            class="w-[100px] h-[100px] rounded-full object-cover"
+            v-else
+            :src="urlFileStorage(singleImageCourse.$id)"
+            alt=""
           />
           <Button
             @click="() => fileInput?.click()"

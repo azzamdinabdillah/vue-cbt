@@ -9,8 +9,16 @@ const bucketId = "682c2fb0001659940227";
 
 export async function getFileAsFile(fileId: string) {
   try {
-    const res: any = await storage.getFileView(bucketId, fileId);
-    return res;
+    const fileUrl = storage.getFileView(bucketId, fileId);
+    const response = await fetch(fileUrl);
+    const blob = await response.blob();
+    const file = new File(
+      [blob],
+      `downloaded-file.${blob.type.split("/")[1]}`,
+      { type: blob.type }
+    );
+
+    return file;
   } catch (error: any) {
     console.log(error);
 
@@ -21,8 +29,6 @@ export async function getFileAsFile(fileId: string) {
 export async function getFile(fileId: string) {
   try {
     const file = await storage.getFile(bucketId, fileId);
-    console.log(file);
-
     return file;
   } catch (error: any) {
     throw new Error(error.message);
