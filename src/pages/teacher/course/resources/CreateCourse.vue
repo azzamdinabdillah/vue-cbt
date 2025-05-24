@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, toRaw, watchEffect } from "vue";
+import { computed, inject, onMounted, ref, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
@@ -24,6 +24,7 @@ import { createData, getSingleData } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
 import { useRoute } from "vue-router";
+import SkeletonInput from "../../../../components/skeleton/SkeletonInput.vue";
 
 const toast = inject<ToastIF>("toast")!;
 const route = useRoute();
@@ -84,8 +85,8 @@ const [name, nameAttr] = defineField("name");
 const [category, categoryAttr] = defineField("category");
 const [level, levelAttr] = defineField("level");
 
-const { data: singleCourse } = useQuery({
-  queryKey: ["singleCourse"],
+const { data: singleCourse, isPending: singleCourseLoading } = useQuery({
+  queryKey: ["singleCourse", route.params.courseId],
   queryFn: async (): Promise<CollectionCourseIF> => {
     const datas = await getSingleData({
       collection: "courses",
@@ -117,7 +118,7 @@ const { data: singleImageCourse, isPending: singleImageCourseLoading } =
   });
 
 watchEffect(() => {
-  if (singleCourse.value) {
+  if (singleCourse.value && route.params.courseId) {
     setValues({
       category: singleCourse.value.category,
       level: singleCourse.value.level,
@@ -204,21 +205,23 @@ function imageOnChange(e: Event) {
       <div class="flex flex-col gap-3">
         <div class="flex items-center gap-5">
           <img
-            v-if="imageUrl"
+            v-if="!route.params.courseId"
             :src="imageUrl ? imageUrl : '/images/profile-placeholder.png'"
             alt=""
             class="w-[100px] h-[100px] rounded-full object-cover"
           />
-          <div
-            class="w-[100px] h-[100px] rounded-full object-cover bg-a5 animate-pulse"
-            v-else-if="route.params.courseId && singleImageCourseLoading"
-          ></div>
-          <img
-            class="w-[100px] h-[100px] rounded-full object-cover"
-            v-else
-            :src="urlFileStorage(singleImageCourse.$id)"
-            alt=""
-          />
+          <div v-else>
+            <div
+              class="w-[100px] h-[100px] rounded-full object-cover bg-gray/20 animate-pulse"
+              v-if="route.params.courseId && singleImageCourseLoading"
+            ></div>
+            <img
+              class="w-[100px] h-[100px] rounded-full object-cover"
+              v-else
+              :src="urlFileStorage(singleImageCourse.$id)"
+              alt=""
+            />
+          </div>
           <Button
             @click="() => fileInput?.click()"
             type="button"
@@ -236,41 +239,50 @@ function imageOnChange(e: Event) {
           />
         </div>
 
-        <p class="text-12 font-medium text-red">{{ errors.image }}</p>
+        <p class="text-12 font-medium text-red" v-if="!route.params.courseId">
+          {{ errors.image }}
+        </p>
       </div>
 
-      <InputGroup
-        :error="errors.name"
-        :required="true"
-        v-model="name"
-        v-bind="nameAttr"
-        id="name"
-        label="Course Name"
-        placeholder="Write your better course name"
-        prefix="/icons/note-favorite-black.svg"
-        type="text"
+      <SkeletonInput
+        v-for="i in 3"
+        v-if="singleCourseLoading && route.params.courseId"
+        :key="i"
       />
+      <div v-else class="flex-col-wrapper">
+        <InputGroup
+          :error="errors.name"
+          :required="true"
+          v-model="name"
+          v-bind="nameAttr"
+          id="name"
+          label="Course Name"
+          placeholder="Write your better course name"
+          prefix="/icons/note-favorite-black.svg"
+          type="text"
+        />
 
-      <CustomSelectGroup
-        :error="errors.category"
-        v-bind="categoryAttr"
-        v-model="category"
-        label="Category"
-        placeholder="Select Category"
-        icon="/icons/bill.svg"
-        :option="[...CATEGORIES]"
-      />
+        <CustomSelectGroup
+          :error="errors.category"
+          v-bind="categoryAttr"
+          v-model="category"
+          label="Category"
+          placeholder="Select Category"
+          icon="/icons/bill.svg"
+          :option="[...CATEGORIES]"
+        />
 
-      <CustomSelectGroup
-        :error="errors.level"
-        v-bind="levelAttr"
-        v-model="level"
-        direction="top"
-        label="Level"
-        placeholder="Select level"
-        icon="/icons/security-user.svg"
-        :option="[...LEVELS]"
-      />
+        <CustomSelectGroup
+          :error="errors.level"
+          v-bind="levelAttr"
+          v-model="level"
+          direction="top"
+          label="Level"
+          placeholder="Select level"
+          icon="/icons/security-user.svg"
+          :option="[...LEVELS]"
+        />
+      </div>
 
       <!-- <div class="flex gap-2.5">
         <input id="aggree" type="checkbox" class="checkbox-style" />
