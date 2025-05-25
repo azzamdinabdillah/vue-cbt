@@ -17,9 +17,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import {
   deleteFile,
-  getFile,
   getFileAsFile,
-  updateFile,
   uploadFile,
 } from "../../../../appwrite/storage";
 import {
@@ -120,10 +118,8 @@ const { data: singleImageCourse, isPending: singleImageCourseLoading } =
       }
 
       const file = await getFileAsFile(singleCourse.value.image ?? "");
-      // const fileId = await getFile(singleCourse.value.image ?? "");
       return {
         file,
-        // fileId,
         urlFile: URL.createObjectURL(file),
       };
     },
@@ -154,17 +150,26 @@ onMounted(() => {
 const onSubmit = handleSubmit(async (data) => {
   try {
     if (route.params.courseId) {
-      const uploadUpdate = await mutationUploadUpdate();
-      await mutationCourseUpdate({
-        datas: {
-          image: image.value ? uploadUpdate : singleImageCourse.value.fileId,
-          name: data.name,
-          category: data.category,
-          level: data.level,
-          created_at: new Date(),
-        },
-        documentId: route.params.courseId as string,
-      });
+      const datas = {
+        name: data.name,
+        category: data.category,
+        level: data.level,
+      };
+      if (image.value) {
+        const uploadUpdate = await mutationUploadUpdate();
+        await mutationCourseUpdate({
+          datas: {
+            image: image.value ? uploadUpdate : singleImageCourse.value.fileId,
+            ...datas,
+          },
+          documentId: route.params.courseId as string,
+        });
+      } else {
+        await mutationCourseUpdate({
+          datas,
+          documentId: route.params.courseId as string,
+        });
+      }
       toast.open("Course updated successfully", "success");
     } else {
       const upload = await mutationUpload();

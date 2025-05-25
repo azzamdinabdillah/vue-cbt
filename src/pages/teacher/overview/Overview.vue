@@ -155,7 +155,7 @@ const lastStudentsAdded = [
             class="flex items-center gap-4"
           >
             <img
-              :src="urlFileStorage(course.image)"
+              :src="urlFileStorage(course.image ?? '')"
               alt=""
               class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
             />
