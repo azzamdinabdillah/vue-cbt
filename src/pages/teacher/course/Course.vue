@@ -7,8 +7,12 @@ import TableSelectAction from "../../../components/TableSelectAction.vue";
 import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
 import { deleteFile, urlFileStorage } from "../../../appwrite/storage";
-import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
-import { computed, inject } from "vue";
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  useVueTable,
+} from "@tanstack/vue-table";
+import { computed, inject, reactive, ref } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { deleteData, getData } from "../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
@@ -59,6 +63,11 @@ const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
   },
 });
 
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 1,
+});
+
 const tableInstance = useVueTable({
   data: computed(() => data.value ?? []),
   columns: [
@@ -80,6 +89,15 @@ const tableInstance = useVueTable({
     },
   ],
   getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  state: computed(() => ({
+    pagination: pagination.value,
+  })),
+  onPaginationChange: (updater) => {
+    const newState =
+      typeof updater === "function" ? updater(pagination.value) : updater;
+    pagination.value = newState;
+  },
 });
 
 async function deleteCourse(documentId: string, fileId: string) {
@@ -111,7 +129,9 @@ async function deleteCourse(documentId: string, fileId: string) {
     <div v-if="data?.length === 0">
       <div class="flex-col-wrapper justify-center items-center py-5">
         <div class="flex-col-1">
-          <h1 class="text-18 text-center text-black font-bold">No Course Found</h1>
+          <h1 class="text-18 text-center text-black font-bold">
+            No Course Found
+          </h1>
           <p class="text-14 text-gray text-center leading-5">
             You don't have any course yet
           </p>
@@ -152,12 +172,12 @@ async function deleteCourse(documentId: string, fileId: string) {
             </tr>
             <tr
               v-else
-              v-for="row in tableInstance.getRowModel().rows"
+              v-for="row in tableInstance.getPaginationRowModel().rows"
               :key="row.id"
             >
               <td v-for="cell in row.getVisibleCells()" :key="cell.id">
                 <template v-if="cell.column.id === 'course'">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-4 lg:max-w-[200px]">
                     <img
                       :src="urlFileStorage(cell.row.original.image || '')"
                       alt=""
@@ -165,7 +185,7 @@ async function deleteCourse(documentId: string, fileId: string) {
                     />
                     <div class="flex-col-1">
                       <h4
-                        class="text-18 font-bold text-black capitalize text-start"
+                        class="text-18 font-bold text-black capitalize text-start max-w-[180px] text-ellipsis overflow-hidden whitespace-nowrap"
                       >
                         {{ cell.row.original.name }}
                       </h4>
@@ -247,11 +267,11 @@ async function deleteCourse(documentId: string, fileId: string) {
       </div>
 
       <div class="flex gap-4 items-center">
-        <Pagination
-          v-for="i in 5"
-          :page="i"
-          :isActive="i === 3 ? true : false"
-        />
+        <div
+          v-on:click="tableInstance.getCanNextPage()"
+          class="cursor-pointer"
+        ></div>
+        <Pagination :table-instance="tableInstance" />
       </div>
     </div>
   </div>
