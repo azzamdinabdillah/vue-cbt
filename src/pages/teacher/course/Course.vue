@@ -12,7 +12,7 @@ import {
   getPaginationRowModel,
   useVueTable,
 } from "@tanstack/vue-table";
-import { computed, inject, reactive, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { deleteData, getData } from "../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
@@ -65,7 +65,7 @@ const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
 
 const pagination = ref({
   pageIndex: 0,
-  pageSize: 1,
+  pageSize: 5,
 });
 
 const tableInstance = useVueTable({
@@ -106,6 +106,9 @@ async function deleteCourse(documentId: string, fileId: string) {
     await deleteCourseMutate(documentId);
     queryClient.invalidateQueries({ queryKey: ["courses"] });
     toast.open("Course deleted successfully", "success");
+
+    // trick to close dropdown(TableSelectAction) components without passing props
+    window.dispatchEvent(new Event("close-dropdown"));
   } catch (error: any) {
     console.log(error);
     toast.open("Error : " + error.message, "error");
@@ -237,7 +240,8 @@ async function deleteCourse(documentId: string, fileId: string) {
                       class=""
                       >Edit Course</RouterLink
                     >
-                    <p
+                    <button
+                      :disabled="loadingDeleteCourse || loadingDeleteFile"
                       @click="
                         () =>
                           deleteCourse(
@@ -254,10 +258,10 @@ async function deleteCourse(documentId: string, fileId: string) {
                     >
                       {{
                         loadingDeleteCourse || loadingDeleteFile
-                          ? "wait..."
+                          ? "Wait...."
                           : "Delete"
                       }}
-                    </p>
+                    </button>
                   </TableSelectAction>
                 </template>
               </td>

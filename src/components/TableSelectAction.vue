@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 defineProps<{
   direction: "top" | "bottom";
@@ -11,6 +11,16 @@ const style = ref({
   width: 0,
 });
 
+onMounted(() => {
+  window.addEventListener("scroll", () => {
+    isOpen.value = false;
+  });
+
+  window.addEventListener("close-dropdown", () => {
+    isOpen.value = false;
+  });
+});
+
 function toggleMenu(e: MouseEvent) {
   isOpen.value = !isOpen.value;
   const menu = (e.currentTarget as HTMLElement)
@@ -19,8 +29,8 @@ function toggleMenu(e: MouseEvent) {
 
   if (!menu) return;
   style.value = {
-    top: menu.top - 1 + window.scrollY,
-    left: menu.left + window.scrollX,
+    top: menu.top - 1,
+    left: menu.left,
     width: menu.width,
   };
 }
