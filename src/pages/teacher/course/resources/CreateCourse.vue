@@ -406,6 +406,8 @@ function imageOnChange(e: Event) {
           isCoursePendingUpdate ||
           isUploadPendingUpdate
             ? "Loading..."
+            : route.params.courseId
+            ? "Update Course"
             : "Create Course"
         }}</Button
       >
