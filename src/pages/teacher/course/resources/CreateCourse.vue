@@ -27,7 +27,7 @@ import {
 } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
-import { useRoute } from "vue-router";
+import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import SkeletonInput from "../../../../components/skeleton/SkeletonInput.vue";
 
 const toast = inject<ToastIF>("toast")!;
@@ -91,6 +91,7 @@ const [level, levelAttr] = defineField("level");
 
 const { data: singleCourse, isPending: singleCourseLoading } = useQuery({
   queryKey: ["singleCourse", route.params.courseId],
+  enabled: computed(() => !!route.params.courseId),
   queryFn: async (): Promise<CollectionCourseIF> => {
     const datas = await getSingleData({
       collection: "courses",
@@ -144,6 +145,14 @@ watch(singleImageCourse, () => {
 onMounted(() => {
   if (!route.params.courseId) {
     resetForm();
+  } else {
+    if (singleCourse.value) {
+      setValues({
+        category: singleCourse.value.category,
+        level: singleCourse.value.level,
+        name: singleCourse.value.name,
+      });
+    }
   }
 });
 
