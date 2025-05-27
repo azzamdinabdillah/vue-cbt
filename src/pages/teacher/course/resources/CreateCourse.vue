@@ -27,7 +27,7 @@ import {
 } from "../../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
-import { onBeforeRouteUpdate, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import SkeletonInput from "../../../../components/skeleton/SkeletonInput.vue";
 
 const toast = inject<ToastIF>("toast")!;

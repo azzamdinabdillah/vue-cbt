@@ -3,25 +3,6 @@ import { reactive, ref } from "vue";
 import Button from "../../../components/Button.vue";
 import FloatingMenu from "../../../components/FloatingMenu.vue";
 
-const options = [
-  {
-    id: 1,
-    title: "Enhancing product aesthetics",
-  },
-  {
-    id: 2,
-    title: "Improving usability and accessibility",
-  },
-  {
-    id: 3,
-    title: "Increasing product sales",
-  },
-  {
-    id: 4,
-    title: "Creating a user-friendly interface",
-  },
-];
-
 interface QuestionIF {
   id: number;
   question: string;

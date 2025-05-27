@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRaw, watchEffect } from "vue";
+import { ref, toRaw, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import CategoryBadge from "../../../../components/CategoryBadge.vue";

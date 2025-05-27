@@ -11,6 +11,7 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   useVueTable,
+  type TableState,
 } from "@tanstack/vue-table";
 import { computed, inject, ref } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
@@ -92,7 +93,7 @@ const tableInstance = useVueTable({
   getPaginationRowModel: getPaginationRowModel(),
   state: computed(() => ({
     pagination: pagination.value,
-  })),
+  })) as Partial<TableState>,
   onPaginationChange: (updater) => {
     const newState =
       typeof updater === "function" ? updater(pagination.value) : updater;

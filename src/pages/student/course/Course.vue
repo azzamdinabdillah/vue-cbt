@@ -2,9 +2,10 @@
 import { RouterLink } from "vue-router";
 import Button from "../../../components/Button.vue";
 import CategoryBadge from "../../../components/CategoryBadge.vue";
-import Pagination from "../../../components/Pagination.vue";
+// import Pagination from "../../../components/Pagination.vue";
 import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
+import type { Category } from "../../../interface/commonType";
 
 interface TableIF {
   course: {
@@ -14,7 +15,7 @@ interface TableIF {
   };
   dateCreated: Date;
   isComplete: boolean;
-  category: "Product Design" | "Programming" | "Marketing";
+  category: Category;
 }
 
 const table: TableIF[] = [
@@ -25,7 +26,7 @@ const table: TableIF[] = [
       subtitle: "Beginners",
     },
     dateCreated: new Date("2024-08-22"),
-    category: "Product Design",
+    category: "Design",
     isComplete: false,
   },
   {
@@ -55,7 +56,7 @@ const table: TableIF[] = [
       subtitle: "Beginners",
     },
     dateCreated: new Date("2024-06-30"),
-    category: "Product Design",
+    category: "Design",
     isComplete: true,
   },
   {
@@ -138,7 +139,7 @@ const table: TableIF[] = [
     </div>
 
     <div class="flex gap-4 items-center">
-      <Pagination v-for="i in 5" :page="i" :isActive="i === 3 ? true : false" />
+      <!-- <Pagination v-for="i in 5" :page="i" :isActive="i === 3 ? true : false" /> -->
     </div>
   </div>
 </template>

@@ -58,7 +58,7 @@ const students = [
                 <div
                   class="absolute bottom-0 left-1/2 transform -translate-x-1/2"
                 >
-                  <CategoryBadge category="Product Design" />
+                  <CategoryBadge category="Design" />
                 </div>
               </div>
               <div class="relative md:hidden">
