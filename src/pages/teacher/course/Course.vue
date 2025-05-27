@@ -216,12 +216,7 @@ async function deleteCourse(documentId: string, fileId: string) {
                 <template v-else-if="cell.column.id === 'action'">
                   <TableSelectAction direction="bottom">
                     <RouterLink
-                      :to="{
-                        name: 'manage-course',
-                        params: {
-                          courseId: cell.id,
-                        },
-                      }"
+                      :to="`/course/manage-course/${cell.row.original.id}`"
                       class=""
                       >Manage</RouterLink
                     >

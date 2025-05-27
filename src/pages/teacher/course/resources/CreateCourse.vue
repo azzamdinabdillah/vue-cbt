@@ -284,7 +284,7 @@ function imageOnChange(e: Event) {
       <div class="flex flex-col gap-3">
         <div class="flex items-center gap-5">
           <div
-            class="w-[100px] h-[100px] rounded-full object-cover bg-gray/20 animate-pulse"
+            class="w-[100px] h-[100px] rounded-full object-cover bg-gray/10 animate-pulse"
             v-if="route.params.courseId && singleImageCourseLoading"
           ></div>
           <img
@@ -306,7 +306,7 @@ function imageOnChange(e: Event) {
             class="w-[100px] h-[100px] rounded-full object-cover"
           />
           <div
-            class="w-[100px] h-[100px] rounded-full object-cover bg-gray/20 animate-pulse"
+            class="w-[100px] h-[100px] rounded-full object-cover bg-gray/10 animate-pulse"
             v-else-if="route.params.courseId && singleImageCourseLoading"
           ></div>
           <img

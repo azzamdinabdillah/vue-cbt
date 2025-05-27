@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref, toRaw, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import CategoryBadge from "../../../../components/CategoryBadge.vue";
 import FloatingMenu from "../../../../components/FloatingMenu.vue";
+import { useQuery } from "@tanstack/vue-query";
+import { useRoute } from "vue-router";
+import { getSingleData } from "../../../../appwrite/api";
+import { urlFileStorage } from "../../../../appwrite/storage";
+import dayjs from "dayjs";
 
 const questions = [
   {
@@ -21,6 +26,24 @@ const questions = [
 ];
 
 const openMenu = ref(false);
+const route = useRoute();
+
+const { data, isPending } = useQuery({
+  enabled: !!route.params.courseId,
+  queryKey: ["manageCourse", route.params.courseId],
+  queryFn: async () => {
+    return await getSingleData({
+      collection: "courses",
+      documentId: route.params.courseId as string,
+    });
+  },
+});
+
+watchEffect(() => {
+  if (data.value) {
+    console.log("Course data:", toRaw(data.value));
+  }
+});
 </script>
 
 <template>
@@ -41,6 +64,33 @@ const openMenu = ref(false);
     <div class="lg:max-w-[90%] mx-auto w-full flex-col-wrapper">
       <div class="md:flex justify-between items-center">
         <div
+          class="flex flex-wrap gap-4 md:gap-6 items-center w-full"
+          v-if="isPending"
+        >
+          <div
+            class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover animate-pulse bg-gray/10"
+          ></div>
+
+          <div class="flex flex-col gap-3 md:gap-5 w-full max-w-[400px]">
+            <div
+              class="w-full h-[30px] rounded-lg animate-pulse bg-gray/10"
+            ></div>
+            <div class="flex gap-4 md:gap-5 items-center flex-wrap">
+              <div class="flex gap-1.5 md:gap-2.5 items-center">
+                <div
+                  class="w-[80px] h-[20px] rounded-lg animate-pulse bg-gray/10"
+                ></div>
+              </div>
+              <div class="flex gap-1.5 md:gap-2.5 items-center">
+                <div
+                  class="w-[100px] h-[20px] rounded-lg animate-pulse bg-gray/10"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          v-else
           class="flex gap-4 md:gap-6 flex-col items-start md:flex-row md:items-center"
         >
           <div class="image w-full md:w-fit">
@@ -49,14 +99,14 @@ const openMenu = ref(false);
             >
               <div class="relative">
                 <img
-                  src="/icons/last-course-1.svg"
+                  :src="urlFileStorage(data?.image)"
                   alt=""
                   class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover"
                 />
                 <div
-                  class="absolute bottom-0 left-1/2 transform -translate-x-1/2"
+                  class="absolute -bottom-0 left-1/2 transform -translate-x-1/2"
                 >
-                  <CategoryBadge category="Design" />
+                  <CategoryBadge :category="data?.category" />
                 </div>
               </div>
               <div class="relative md:hidden">
@@ -97,13 +147,15 @@ const openMenu = ref(false);
           </div>
 
           <div class="flex flex-col gap-3 md:gap-5">
-            <h1 class="text-2xl md:text-3xl text-black font-bold">
-              Digital Marketing 101
+            <h1 class="text-2xl md:text-3xl text-black font-bold capitalize">
+              {{ data?.name || "Course Name" }}
             </h1>
             <div class="flex gap-4 md:gap-5 items-center flex-wrap">
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/calendar-add.svg" alt="" />
-                <p class="text-16 text-black font-semibold">22 August 2024</p>
+                <p class="text-16 text-black font-semibold">
+                  {{ dayjs(data?.$createdAt).format("DD MMMM YYYY") }}
+                </p>
               </div>
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/profile-2user.svg" alt="" />
@@ -120,7 +172,10 @@ const openMenu = ref(false);
             alt=""
             class="w-11.5 cursor-pointer hover:scale-110 transition"
           />
-          <FloatingMenu :isOpen="openMenu" position="top-1/2 -translate-y-1/2 -left-[220px]">
+          <FloatingMenu
+            :isOpen="openMenu"
+            position="top-1/2 -translate-y-1/2 -left-[220px]"
+          >
             <div class="flex gap-2.5 items-center">
               <img class="w-5" src="/icons/profile-2user.svg" alt="" />
               <p class="text-14 font-semibold text-black">Add Students</p>
