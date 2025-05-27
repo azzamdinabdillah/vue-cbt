@@ -5,7 +5,7 @@ import type {
   CollectionUserIF,
 } from "../interface/databaseCollection";
 
-type collection = "users" | "courses";
+type collection = "users" | "courses" | "questions";
 // type roles = "students" | "teachers";
 
 const databaseId = "682982930002cafc9b6d";
@@ -23,20 +23,27 @@ const collections: {
     name: "courses",
     collectionId: "682c31c00025f30fcc2b",
   },
+  questions: {
+    name: "questions",
+    collectionId: "68355c8c002523f677dd",
+  },
 };
 
 export async function getSingleData({
   collection,
   documentId,
+  query,
 }: {
   collection: collection;
   documentId: string;
+  query?: any[];
 }) {
   try {
     const result = await databases.getDocument(
       databaseId,
       collections[collection].collectionId,
-      documentId
+      documentId,
+      query
     );
 
     return result;

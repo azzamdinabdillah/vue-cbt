@@ -1,29 +1,16 @@
 <script setup lang="ts">
-import { ref, toRaw, watchEffect } from "vue";
+import { onMounted, ref, toRaw, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import CategoryBadge from "../../../../components/CategoryBadge.vue";
 import FloatingMenu from "../../../../components/FloatingMenu.vue";
 import { useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
-import { getSingleData } from "../../../../appwrite/api";
+import { getData, getSingleData } from "../../../../appwrite/api";
 import { urlFileStorage } from "../../../../appwrite/storage";
 import dayjs from "dayjs";
-
-const questions = [
-  {
-    question: "Why do we need to do marketing?",
-    answer: "To reach a wider audience and increase sales.",
-  },
-  {
-    question: "What is the best way to market a product?",
-    answer: "Through social media and online advertising.",
-  },
-  {
-    question: "How can we measure the success of our marketing efforts?",
-    answer: "By tracking sales and customer engagement.",
-  },
-];
+import { Query } from "appwrite";
+import SkeletonDetailCourse from "../../../../components/skeleton/SkeletonDetailCourse.vue";
 
 const openMenu = ref(false);
 const route = useRoute();
@@ -39,10 +26,32 @@ const { data, isPending } = useQuery({
   },
 });
 
+const {
+  data: questionDatas,
+  isPending: loadingQuestionDatas,
+  refetch,
+} = useQuery({
+  enabled: !!data.value?.$id,
+  queryKey: ["questionDatas", data.value?.$id],
+  queryFn: async () => {
+    return await getData({
+      collection: "questions",
+      query: [Query.equal("course_id", route.params.courseId ?? "")],
+    });
+  },
+});
+
 watchEffect(() => {
   if (data.value) {
     console.log("Course data:", toRaw(data.value));
+    if (questionDatas.value) {
+      console.log("Question data:", toRaw(questionDatas.value));
+    }
   }
+});
+
+onMounted(() => {
+  refetch();
 });
 </script>
 
@@ -63,32 +72,8 @@ watchEffect(() => {
 
     <div class="lg:max-w-[90%] mx-auto w-full flex-col-wrapper">
       <div class="md:flex justify-between items-center">
-        <div
-          class="flex flex-wrap gap-4 md:gap-6 items-center w-full"
-          v-if="isPending"
-        >
-          <div
-            class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover animate-pulse bg-gray/10"
-          ></div>
-
-          <div class="flex flex-col gap-3 md:gap-5 w-full max-w-[400px]">
-            <div
-              class="w-full h-[30px] rounded-lg animate-pulse bg-gray/10"
-            ></div>
-            <div class="flex gap-4 md:gap-5 items-center flex-wrap">
-              <div class="flex gap-1.5 md:gap-2.5 items-center">
-                <div
-                  class="w-[80px] h-[20px] rounded-lg animate-pulse bg-gray/10"
-                ></div>
-              </div>
-              <div class="flex gap-1.5 md:gap-2.5 items-center">
-                <div
-                  class="w-[100px] h-[20px] rounded-lg animate-pulse bg-gray/10"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SkeletonDetailCourse v-if="isPending"></SkeletonDetailCourse>
+        
         <div
           v-else
           class="flex gap-4 md:gap-6 flex-col items-start md:flex-row md:items-center"
@@ -198,7 +183,26 @@ watchEffect(() => {
         </div>
       </div>
 
-      <div class="flex-col-30">
+      <div
+        v-if="loadingQuestionDatas"
+        v-for="n in 5"
+        :key="n"
+        class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center animate-pulse"
+      >
+        <div class="flex flex-col gap-1.5">
+          <div class="h-4 w-24 bg-gray/15 rounded md:w-28"></div>
+          <div class="h-6 w-40 bg-gray/15 rounded md:w-60"></div>
+        </div>
+
+        <div
+          class="flex gap-2 md:gap-3.5 justify-end items-center w-full md:w-fit"
+        >
+          <div class="h-10 w-[100px] bg-gray/15 rounded md:w-[120px]"></div>
+          <div class="h-10 w-10 bg-gray/15 rounded"></div>
+        </div>
+      </div>
+
+      <div class="flex-col-30" v-if="questionDatas">
         <div class="flex flex-col gap-2">
           <h1 class="text-24 font-bold text-black">Course Tests</h1>
           <RouterLink
@@ -221,14 +225,21 @@ watchEffect(() => {
           </RouterLink>
         </div>
 
+        <h1
+          v-if="!questionDatas.length"
+          class="text-16 text-black font-semibold text-center"
+        >
+          Question Is Empty, please add question
+        </h1>
+
         <div
-          v-for="(question, index) in questions"
+          v-for="(question, index) in questionDatas"
           :key="index"
           class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
         >
           <div class="flex flex-col gap-1.5">
             <h4 class="text-16 text-gray">Question</h4>
-            <p class="text-20 text-black font-bold">
+            <p class="text-20 text-black font-bold capitalize">
               {{ question.question }}
             </p>
           </div>
