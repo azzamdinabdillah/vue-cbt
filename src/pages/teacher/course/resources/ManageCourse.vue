@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { onMounted, ref, toRaw, watchEffect } from "vue";
+import { inject, onMounted, ref, toRaw, watchEffect } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import CategoryBadge from "../../../../components/CategoryBadge.vue";
 import FloatingMenu from "../../../../components/FloatingMenu.vue";
-import { useQuery } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
-import { getData, getSingleData } from "../../../../appwrite/api";
+import { deleteData, getData, getSingleData } from "../../../../appwrite/api";
 import { urlFileStorage } from "../../../../appwrite/storage";
 import dayjs from "dayjs";
 import { Query } from "appwrite";
 import SkeletonDetailCourse from "../../../../components/skeleton/SkeletonDetailCourse.vue";
+import type { ToastIF } from "../../../../interface/commonInterface";
 
 const openMenu = ref(false);
 const route = useRoute();
+const toast = inject<ToastIF>("toast")!;
 
 const { data, isPending } = useQuery({
   enabled: !!route.params.courseId,
@@ -41,6 +43,21 @@ const {
   },
 });
 
+const { mutate: deleteQuestionMutate, isPending: loadingDeleteQuestion } =
+  useMutation({
+    mutationFn: async (documentId: string) => {
+      return await deleteData({
+        collection: "questions",
+        documentId: documentId,
+      });
+    },
+
+    onSuccess: () => {
+      toast.open("Question deleted successfully", "success");
+      refetch();
+    },
+  });
+
 onMounted(() => {
   refetch();
 });
@@ -64,7 +81,7 @@ onMounted(() => {
     <div class="lg:max-w-[90%] mx-auto w-full flex-col-wrapper">
       <div class="md:flex justify-between items-center">
         <SkeletonDetailCourse v-if="isPending"></SkeletonDetailCourse>
-        
+
         <div
           v-else
           class="flex gap-4 md:gap-6 flex-col items-start md:flex-row md:items-center"
@@ -246,7 +263,16 @@ onMounted(() => {
             >
               Edit
             </Button>
-            <img src="/icons/trash.svg" alt="" />
+            <button
+              class="hover:scale-105 transition cursor-pointer disabled:opacity-20"
+              :disabled="loadingDeleteQuestion"
+            >
+              <img
+                @click="deleteQuestionMutate(question.$id)"
+                src="/icons/trash.svg"
+                alt=""
+              />
+            </button>
           </div>
         </div>
       </div>
