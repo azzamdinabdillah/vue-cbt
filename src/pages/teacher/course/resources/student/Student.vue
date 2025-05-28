@@ -1,28 +1,67 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import Breadcrump from "../../../../../components/Breadcrump.vue";
 import Button from "../../../../../components/Button.vue";
 import CategoryBadge from "../../../../../components/CategoryBadge.vue";
 import IsPassed from "../../../../../components/IsPassed.vue";
+import { computed, toRaw, watchEffect } from "vue";
+import { useQuery } from "@tanstack/vue-query";
+import { getData, getSingleData } from "../../../../../appwrite/api";
+import SkeletonDetailCourse from "../../../../../components/skeleton/SkeletonDetailCourse.vue";
+import { urlFileStorage } from "../../../../../appwrite/storage";
+import dayjs from "dayjs";
+import { Query } from "appwrite";
 
-const students = [
+const route = useRoute();
+
+const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
   {
-    name: "John Smith",
-    email: "john.smith@example.com",
+    enabled: !!route.params.courseId,
+    queryKey: ["manageCourse", route.params.courseId],
+    queryFn: async () => {
+      return await getSingleData({
+        collection: "courses",
+        documentId: route.params.courseId as string,
+      });
+    },
+  }
+);
+
+const { data: studentsCourseData } = useQuery({
+  enabled: !!route.params.courseId,
+  queryKey: ["questionDatas", singleCourseData.value?.$id],
+  queryFn: async () => {
+    return await getData({
+      collection: "students_course",
+      query: [Query.equal("course_id", route.params.courseId ?? "")],
+    });
   },
-  {
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
+});
+
+const { data: studentsData } = useQuery({
+  enabled: computed(() => !!studentsCourseData.value),
+  queryKey: ["student", studentsCourseData.value],
+  queryFn: async () => {
+    return await getData({
+      collection: "users",
+      query: [
+        Query.equal(
+          "$id",
+          studentsCourseData.value?.map((item) => item.user_id) as string[]
+        ),
+      ],
+    });
   },
-  {
-    name: "Alice Johnson",
-    email: "alice.johnson@example.com",
-  },
-  {
-    name: "Wong Etan",
-    email: "wong.etan@example.com",
-  },
-];
+});
+
+watchEffect(() => {
+  console.log(toRaw(studentsCourseData.value));
+  // console.log(toRaw(studentsCourseData.value?.map((item) => item.user_id)));
+
+  if (studentsCourseData.value) {
+    console.log(toRaw(studentsData.value));
+  }
+});
 </script>
 
 <template>
@@ -42,7 +81,12 @@ const students = [
 
     <div class="max-w-[870px] mx-auto w-full flex-col-wrapper">
       <div class="md:flex justify-between items-center">
+        <SkeletonDetailCourse
+          v-if="loadingSingleCourseData"
+        ></SkeletonDetailCourse>
+
         <div
+          v-else
           class="flex gap-4 md:gap-6 flex-col items-start md:flex-row md:items-center"
         >
           <div class="image w-full md:w-fit">
@@ -51,14 +95,14 @@ const students = [
             >
               <div class="relative">
                 <img
-                  src="/icons/last-course-1.svg"
+                  :src="urlFileStorage(singleCourseData?.image)"
                   alt=""
                   class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover"
                 />
                 <div
                   class="absolute bottom-0 left-1/2 transform -translate-x-1/2"
                 >
-                  <CategoryBadge category="Design" />
+                  <CategoryBadge :category="singleCourseData?.category" />
                 </div>
               </div>
               <div class="relative md:hidden">
@@ -76,12 +120,16 @@ const students = [
 
           <div class="flex flex-col gap-3 md:gap-5">
             <h1 class="text-2xl md:text-3xl text-black font-bold">
-              Digital Marketing 101
+              {{ singleCourseData?.name || "Course Name" }}
             </h1>
             <div class="flex gap-4 md:gap-5 items-center flex-wrap">
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/calendar-add.svg" alt="" />
-                <p class="text-16 text-black font-semibold">22 August 2024</p>
+                <p class="text-16 text-black font-semibold">
+                  {{
+                    dayjs(singleCourseData?.$createdAt).format("DD MMMM YYYY")
+                  }}
+                </p>
               </div>
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/profile-2user.svg" alt="" />
@@ -107,7 +155,7 @@ const students = [
         <h1 class="text-24 font-bold text-black">Students</h1>
         <div class="flex gap-5 flex-col">
           <div
-            v-for="(student, index) in students"
+            v-for="(student, index) in studentsData"
             :key="index"
             class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
           >
@@ -121,11 +169,7 @@ const students = [
               </div>
             </div>
 
-            <IsPassed
-              v-if="index % 2 === 0"
-              size="sm"
-              :is-passed="true"
-            />
+            <IsPassed v-if="index % 2 === 0" size="sm" :is-passed="true" />
 
             <IsPassed v-else size="sm" :is-passed="false" />
           </div>

@@ -222,12 +222,7 @@ async function deleteCourse(documentId: string, fileId: string) {
                       >Manage</RouterLink
                     >
                     <RouterLink
-                      :to="{
-                        name: 'student',
-                        params: {
-                          courseId: cell.id,
-                        },
-                      }"
+                      :to="`/course/student/${cell.row.original.id}`"
                       class=""
                       >Students</RouterLink
                     >

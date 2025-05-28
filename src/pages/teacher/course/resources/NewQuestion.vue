@@ -82,6 +82,7 @@ const { mutate: mutationQuestion, isPending: isPendingQuestion } = useMutation({
 
   onSuccess: () => {
     toast.open("Question created successfully", "success");
+    resetForm();
   },
 
   onError: (error: any) => {
@@ -101,6 +102,7 @@ const { mutate: mutationQuestionUpdate, isPending: isPendingQuestionUpdate } =
 
     onSuccess: () => {
       toast.open("Question updated successfully", "success");
+      resetForm();
     },
 
     onError: (error: any) => {
@@ -339,7 +341,7 @@ onMounted(() => {
           variant="blue"
           customClass="w-full"
           >{{
-            isPendingQuestion
+            isPendingQuestion || isPendingQuestionUpdate
               ? "Loading..."
               : route.params.questionId
               ? "Update Question"

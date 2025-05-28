@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, toRaw, watchEffect } from "vue";
+import { inject, onMounted, ref } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import CategoryBadge from "../../../../components/CategoryBadge.vue";
@@ -17,24 +17,26 @@ const openMenu = ref(false);
 const route = useRoute();
 const toast = inject<ToastIF>("toast")!;
 
-const { data, isPending } = useQuery({
-  enabled: !!route.params.courseId,
-  queryKey: ["manageCourse", route.params.courseId],
-  queryFn: async () => {
-    return await getSingleData({
-      collection: "courses",
-      documentId: route.params.courseId as string,
-    });
-  },
-});
+const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
+  {
+    enabled: !!route.params.courseId,
+    queryKey: ["manageCourse", route.params.courseId],
+    queryFn: async () => {
+      return await getSingleData({
+        collection: "courses",
+        documentId: route.params.courseId as string,
+      });
+    },
+  }
+);
 
 const {
   data: questionDatas,
   isPending: loadingQuestionDatas,
   refetch,
 } = useQuery({
-  enabled: !!data.value?.$id,
-  queryKey: ["questionDatas", data.value?.$id],
+  enabled: !!singleCourseData.value?.$id,
+  queryKey: ["questionDatas", singleCourseData.value?.$id],
   queryFn: async () => {
     return await getData({
       collection: "questions",
@@ -80,7 +82,9 @@ onMounted(() => {
 
     <div class="lg:max-w-[90%] mx-auto w-full flex-col-wrapper">
       <div class="md:flex justify-between items-center">
-        <SkeletonDetailCourse v-if="isPending"></SkeletonDetailCourse>
+        <SkeletonDetailCourse
+          v-if="loadingSingleCourseData"
+        ></SkeletonDetailCourse>
 
         <div
           v-else
@@ -92,14 +96,14 @@ onMounted(() => {
             >
               <div class="relative">
                 <img
-                  :src="urlFileStorage(data?.image)"
+                  :src="urlFileStorage(singleCourseData?.image)"
                   alt=""
                   class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover"
                 />
                 <div
                   class="absolute -bottom-0 left-1/2 transform -translate-x-1/2"
                 >
-                  <CategoryBadge :category="data?.category" />
+                  <CategoryBadge :category="singleCourseData?.category" />
                 </div>
               </div>
               <div class="relative md:hidden">
@@ -141,13 +145,15 @@ onMounted(() => {
 
           <div class="flex flex-col gap-3 md:gap-5">
             <h1 class="text-2xl md:text-3xl text-black font-bold capitalize">
-              {{ data?.name || "Course Name" }}
+              {{ singleCourseData?.name || "Course Name" }}
             </h1>
             <div class="flex gap-4 md:gap-5 items-center flex-wrap">
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/calendar-add.svg" alt="" />
                 <p class="text-16 text-black font-semibold">
-                  {{ dayjs(data?.$createdAt).format("DD MMMM YYYY") }}
+                  {{
+                    dayjs(singleCourseData?.$createdAt).format("DD MMMM YYYY")
+                  }}
                 </p>
               </div>
               <div class="flex gap-1.5 md:gap-2.5 items-center">

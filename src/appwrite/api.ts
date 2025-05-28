@@ -6,7 +6,7 @@ import type {
   CollectionUserIF,
 } from "../interface/databaseCollection";
 
-type collection = "users" | "courses" | "questions";
+type collection = "users" | "courses" | "questions" | "students_course";
 // type roles = "students" | "teachers";
 
 const databaseId = "682982930002cafc9b6d";
@@ -27,6 +27,10 @@ const collections: {
   questions: {
     name: "questions",
     collectionId: "68355c8c002523f677dd",
+  },
+  students_course: {
+    name: "students_course",
+    collectionId: "6836b68700115d3c1ac4",
   },
 };
 
