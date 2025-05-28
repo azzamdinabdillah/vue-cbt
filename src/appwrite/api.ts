@@ -2,6 +2,7 @@ import { ID } from "appwrite";
 import { databases } from "./config";
 import type {
   CollectionCourseIF,
+  CollectionQuestionIF,
   CollectionUserIF,
 } from "../interface/databaseCollection";
 
@@ -77,7 +78,7 @@ export async function createData({
   datas,
 }: {
   collection: collection;
-  datas: CollectionUserIF | CollectionCourseIF;
+  datas: CollectionUserIF | CollectionCourseIF | CollectionQuestionIF;
 }) {
   try {
     const result = await databases.createDocument(

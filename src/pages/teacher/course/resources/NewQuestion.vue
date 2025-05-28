@@ -3,14 +3,19 @@ import { useRoute } from "vue-router";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
-import { useQuery } from "@tanstack/vue-query";
-import { getSingleData } from "../../../../appwrite/api";
+import { useMutation, useQuery } from "@tanstack/vue-query";
+import { createData, getSingleData } from "../../../../appwrite/api";
 import { urlFileStorage } from "../../../../appwrite/storage";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
+import SkeletonDetailCourse from "../../../../components/skeleton/SkeletonDetailCourse.vue";
+import type { CollectionQuestionIF } from "../../../../interface/databaseCollection";
+import type { ToastIF } from "../../../../interface/commonInterface";
+import { inject } from "vue";
 
 const route = useRoute();
+const toast = inject<ToastIF>("toast")!;
 const { data, isPending } = useQuery({
   enabled: !!route.params.courseId,
   queryKey: ["manageCourse", route.params.courseId],
@@ -43,14 +48,11 @@ const schema = z.object({
     .string()
     .min(1, "Question is required")
     .min(3, "Minimum 3 characters"),
+  correct_option: z.enum(["option1", "option2", "option3", "option4"], {
+    message: "Correct option is required",
+  }),
 });
-const { errors, defineField } = useForm<{
-  question: string;
-  option1: string;
-  option2: string;
-  option3: string;
-  option4: string;
-}>({
+const { errors, defineField, handleSubmit } = useForm<CollectionQuestionIF>({
   validationSchema: toTypedSchema(schema),
 });
 
@@ -59,6 +61,31 @@ const [option1, option1Attr] = defineField("option1");
 const [option2, option2Attr] = defineField("option2");
 const [option3, option3Attr] = defineField("option3");
 const [option4, option4Attr] = defineField("option4");
+const [correctOption, correctOptionAttr] = defineField("correct_option");
+
+const { mutate: mutationQuestion, isPending: isPendingQuestion } = useMutation({
+  mutationFn: async (datas: CollectionQuestionIF) => {
+    return await createData({
+      collection: "questions",
+      datas: {
+        ...datas,
+        course_id: route.params.courseId as string,
+      },
+    });
+  },
+
+  onSuccess: () => {
+    toast.open("Question created successfully", "success");
+  },
+
+  onError: (error: any) => {
+    toast.open("Error : " + error.message, "error");
+  },
+});
+
+const onSubmit = handleSubmit(async (data) => {
+  mutationQuestion(data);
+});
 </script>
 
 <template>
@@ -80,7 +107,10 @@ const [option4, option4Attr] = defineField("option4");
       ]"
     ></Breadcrump>
 
-    <form class="flex-col-wrapper max-w-[612px] md:pl-[50px] lg:pl-[70px]">
+    <form
+      @submit.prevent="onSubmit"
+      class="flex-col-wrapper max-w-[612px] md:pl-[50px] lg:pl-[70px]"
+    >
       <SkeletonDetailCourse v-if="isPending"></SkeletonDetailCourse>
       <div class="flex items-center gap-6 flex-wrap" v-else>
         <img
@@ -110,6 +140,9 @@ const [option4, option4Attr] = defineField("option4");
 
         <div class="gap-2.5 flex flex-col">
           <h2 class="text-16 text-black font-semibold">Answers</h2>
+          <p v-if="errors.correct_option" class="text-red text-12 font-medium">
+            {{ errors.correct_option }}
+          </p>
           <div class="flex items-center gap-4">
             <InputGroup
               :error="errors.option1"
@@ -129,6 +162,8 @@ const [option4, option4Attr] = defineField("option4");
                 name="correct-option"
                 class="checkbox-style"
                 value="option1"
+                v-model="correctOption"
+                v-bind="correctOptionAttr"
               />
               <label
                 :for="`aggree1`"
@@ -154,9 +189,11 @@ const [option4, option4Attr] = defineField("option4");
               <input
                 :id="`aggree2`"
                 type="radio"
+                value="option2"
                 name="correct-option"
                 class="checkbox-style"
-                value="option2"
+                v-model="correctOption"
+                v-bind="correctOptionAttr"
               />
               <label
                 :for="`aggree2`"
@@ -183,8 +220,10 @@ const [option4, option4Attr] = defineField("option4");
                 :id="`aggree3`"
                 type="radio"
                 name="correct-option"
-                class="checkbox-style"
                 value="option3"
+                class="checkbox-style"
+                v-model="correctOption"
+                v-bind="correctOptionAttr"
               />
               <label
                 :for="`aggree3`"
@@ -210,9 +249,11 @@ const [option4, option4Attr] = defineField("option4");
               <input
                 :id="`aggree4`"
                 type="radio"
+                value="option4"
                 name="correct-option"
                 class="checkbox-style"
-                value="option4"
+                v-model="correctOption"
+                v-bind="correctOptionAttr"
               />
               <label
                 :for="`aggree4`"
@@ -225,8 +266,12 @@ const [option4, option4Attr] = defineField("option4");
         </div>
       </div>
 
-      <Button type="submit" variant="blue" customClass="w-full"
-        >Save Question</Button
+      <Button
+        :disabled="isPendingQuestion"
+        type="submit"
+        variant="blue"
+        customClass="w-full"
+        >{{ isPendingQuestion ? "Loading..." : "Create Question" }}</Button
       >
     </form>
   </div>

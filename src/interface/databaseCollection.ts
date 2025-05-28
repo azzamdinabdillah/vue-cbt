@@ -16,3 +16,15 @@ export interface CollectionCourseIF {
   image?: string;
   created_at?: Date;
 }
+
+export interface CollectionQuestionIF {
+  id?: string;
+  question: string;
+  course_id?: string;
+  option1: string;
+  option2: string;
+  option3: string;
+  option4: string;
+  correct_option: string;
+  created_at?: Date;
+}

@@ -41,15 +41,6 @@ const {
   },
 });
 
-watchEffect(() => {
-  if (data.value) {
-    console.log("Course data:", toRaw(data.value));
-    if (questionDatas.value) {
-      console.log("Question data:", toRaw(questionDatas.value));
-    }
-  }
-});
-
 onMounted(() => {
   refetch();
 });
