@@ -4,7 +4,11 @@ import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import InputGroup from "../../../../components/InputGroup.vue";
 import { useMutation, useQuery } from "@tanstack/vue-query";
-import { createData, getSingleData } from "../../../../appwrite/api";
+import {
+  createData,
+  getSingleData,
+  updateData,
+} from "../../../../appwrite/api";
 import { urlFileStorage } from "../../../../appwrite/storage";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -12,7 +16,8 @@ import { useForm } from "vee-validate";
 import SkeletonDetailCourse from "../../../../components/skeleton/SkeletonDetailCourse.vue";
 import type { CollectionQuestionIF } from "../../../../interface/databaseCollection";
 import type { ToastIF } from "../../../../interface/commonInterface";
-import { inject } from "vue";
+import { inject, onMounted } from "vue";
+import SkeletonInput from "../../../../components/skeleton/SkeletonInput.vue";
 
 const route = useRoute();
 const toast = inject<ToastIF>("toast")!;
@@ -52,9 +57,10 @@ const schema = z.object({
     message: "Correct option is required",
   }),
 });
-const { errors, defineField, handleSubmit } = useForm<CollectionQuestionIF>({
-  validationSchema: toTypedSchema(schema),
-});
+const { errors, defineField, handleSubmit, setValues, resetForm } =
+  useForm<CollectionQuestionIF>({
+    validationSchema: toTypedSchema(schema),
+  });
 
 const [question, questionAttr] = defineField("question");
 const [option1, option1Attr] = defineField("option1");
@@ -83,8 +89,59 @@ const { mutate: mutationQuestion, isPending: isPendingQuestion } = useMutation({
   },
 });
 
+const { mutate: mutationQuestionUpdate, isPending: isPendingQuestionUpdate } =
+  useMutation({
+    mutationFn: async (datas: CollectionQuestionIF) => {
+      return await updateData({
+        collection: "questions",
+        documentId: route.params.questionId as string,
+        datas: datas,
+      });
+    },
+
+    onSuccess: () => {
+      toast.open("Question updated successfully", "success");
+    },
+
+    onError: (error: any) => {
+      toast.open("Error : " + error.message, "error");
+    },
+  });
+
+const { isPending: isPendingQuestionData } = useQuery({
+  enabled: !!route.params.questionId,
+  queryKey: ["question", route.params.questionId],
+  queryFn: async () => {
+    const datas = await getSingleData({
+      collection: "questions",
+      documentId: route.params.questionId as string,
+    });
+
+    setValues({
+      question: datas.question,
+      option1: datas.option1,
+      option2: datas.option2,
+      option3: datas.option3,
+      option4: datas.option4,
+      correct_option: datas.correct_option,
+    });
+
+    return datas;
+  },
+});
+
 const onSubmit = handleSubmit(async (data) => {
-  mutationQuestion(data);
+  if (route.params.questionId) {
+    mutationQuestionUpdate(data);
+  } else {
+    mutationQuestion(data);
+  }
+});
+
+onMounted(() => {
+  if (!route.params.questionId) {
+    resetForm();
+  }
 });
 </script>
 
@@ -123,156 +180,173 @@ const onSubmit = handleSubmit(async (data) => {
         </h1>
       </div>
 
-      <div class="flex flex-col gap-4 md:gap-5">
-        <h1 class="text-24 font-bold text-black">Add New Question</h1>
+      <div
+        class="flex-col-wrapper"
+        v-if="isPendingQuestionData && route.params.questionId"
+      >
+        <SkeletonInput v-for="i in 4" :key="i" />
+      </div>
+      <div v-else class="flex-col-wrapper">
+        <div class="flex flex-col gap-4 md:gap-5">
+          <h1 class="text-24 font-bold text-black">Add New Question</h1>
 
-        <InputGroup
-          :error="errors.question"
-          v-model="question"
-          v-bind="questionAttr"
-          id="question"
-          prefix="/icons/note-text.svg"
-          label="Question"
-          placeholder="Write your question here"
-          type="text"
-          class="w-full"
-        ></InputGroup>
+          <InputGroup
+            :error="errors.question"
+            v-model="question"
+            v-bind="questionAttr"
+            id="question"
+            prefix="/icons/note-text.svg"
+            label="Question"
+            placeholder="Write your question here"
+            type="text"
+            class="w-full"
+          ></InputGroup>
 
-        <div class="gap-2.5 flex flex-col">
-          <h2 class="text-16 text-black font-semibold">Answers</h2>
-          <p v-if="errors.correct_option" class="text-red text-12 font-medium">
-            {{ errors.correct_option }}
-          </p>
-          <div class="flex items-center gap-4">
-            <InputGroup
-              :error="errors.option1"
-              v-model="option1"
-              v-bind="option1Attr"
-              id="answer1"
-              prefix="/icons/edit.svg"
-              placeholder="Write answer option"
-              type="text"
-              class="w-full"
-            ></InputGroup>
+          <div class="gap-2.5 flex flex-col">
+            <h2 class="text-16 text-black font-semibold">Answers</h2>
+            <p
+              v-if="errors.correct_option"
+              class="text-red text-12 font-medium"
+            >
+              {{ errors.correct_option }}
+            </p>
+            <div class="flex items-center gap-4">
+              <InputGroup
+                :error="errors.option1"
+                v-model="option1"
+                v-bind="option1Attr"
+                id="answer1"
+                prefix="/icons/edit.svg"
+                placeholder="Write answer option"
+                type="text"
+                class="w-full"
+              ></InputGroup>
 
-            <div class="flex gap-2.5">
-              <input
-                :id="`aggree1`"
-                type="radio"
-                name="correct-option"
-                class="checkbox-style"
-                value="option1"
-                v-model="correctOption"
-                v-bind="correctOptionAttr"
-              />
-              <label
-                :for="`aggree1`"
-                class="text-16 cursor-pointer font-semibold text-black"
-              >
-                Correct
-              </label>
+              <div class="flex gap-2.5">
+                <input
+                  :id="`aggree1`"
+                  type="radio"
+                  name="correct-option"
+                  class="checkbox-style"
+                  value="option1"
+                  v-model="correctOption"
+                  v-bind="correctOptionAttr"
+                />
+                <label
+                  :for="`aggree1`"
+                  class="text-16 cursor-pointer font-semibold text-black"
+                >
+                  Correct
+                </label>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-4">
-            <InputGroup
-              :error="errors.option2"
-              v-model="option2"
-              v-bind="option2Attr"
-              id="answer2"
-              prefix="/icons/edit.svg"
-              placeholder="Write answer option"
-              type="text"
-              class="w-full"
-            ></InputGroup>
+            <div class="flex items-center gap-4">
+              <InputGroup
+                :error="errors.option2"
+                v-model="option2"
+                v-bind="option2Attr"
+                id="answer2"
+                prefix="/icons/edit.svg"
+                placeholder="Write answer option"
+                type="text"
+                class="w-full"
+              ></InputGroup>
 
-            <div class="flex gap-2.5">
-              <input
-                :id="`aggree2`"
-                type="radio"
-                value="option2"
-                name="correct-option"
-                class="checkbox-style"
-                v-model="correctOption"
-                v-bind="correctOptionAttr"
-              />
-              <label
-                :for="`aggree2`"
-                class="text-16 cursor-pointer font-semibold text-black"
-              >
-                Correct
-              </label>
+              <div class="flex gap-2.5">
+                <input
+                  :id="`aggree2`"
+                  type="radio"
+                  value="option2"
+                  name="correct-option"
+                  class="checkbox-style"
+                  v-model="correctOption"
+                  v-bind="correctOptionAttr"
+                />
+                <label
+                  :for="`aggree2`"
+                  class="text-16 cursor-pointer font-semibold text-black"
+                >
+                  Correct
+                </label>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-4">
-            <InputGroup
-              :error="errors.option3"
-              v-model="option3"
-              v-bind="option3Attr"
-              id="answer3"
-              prefix="/icons/edit.svg"
-              placeholder="Write answer option"
-              type="text"
-              class="w-full"
-            ></InputGroup>
+            <div class="flex items-center gap-4">
+              <InputGroup
+                :error="errors.option3"
+                v-model="option3"
+                v-bind="option3Attr"
+                id="answer3"
+                prefix="/icons/edit.svg"
+                placeholder="Write answer option"
+                type="text"
+                class="w-full"
+              ></InputGroup>
 
-            <div class="flex gap-2.5">
-              <input
-                :id="`aggree3`"
-                type="radio"
-                name="correct-option"
-                value="option3"
-                class="checkbox-style"
-                v-model="correctOption"
-                v-bind="correctOptionAttr"
-              />
-              <label
-                :for="`aggree3`"
-                class="text-16 cursor-pointer font-semibold text-black"
-              >
-                Correct
-              </label>
+              <div class="flex gap-2.5">
+                <input
+                  :id="`aggree3`"
+                  type="radio"
+                  name="correct-option"
+                  value="option3"
+                  class="checkbox-style"
+                  v-model="correctOption"
+                  v-bind="correctOptionAttr"
+                />
+                <label
+                  :for="`aggree3`"
+                  class="text-16 cursor-pointer font-semibold text-black"
+                >
+                  Correct
+                </label>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-4">
-            <InputGroup
-              :error="errors.option4"
-              v-model="option4"
-              v-bind="option4Attr"
-              id="answer4"
-              prefix="/icons/edit.svg"
-              placeholder="Write answer option"
-              type="text"
-              class="w-full"
-            ></InputGroup>
+            <div class="flex items-center gap-4">
+              <InputGroup
+                :error="errors.option4"
+                v-model="option4"
+                v-bind="option4Attr"
+                id="answer4"
+                prefix="/icons/edit.svg"
+                placeholder="Write answer option"
+                type="text"
+                class="w-full"
+              ></InputGroup>
 
-            <div class="flex gap-2.5">
-              <input
-                :id="`aggree4`"
-                type="radio"
-                value="option4"
-                name="correct-option"
-                class="checkbox-style"
-                v-model="correctOption"
-                v-bind="correctOptionAttr"
-              />
-              <label
-                :for="`aggree4`"
-                class="text-16 cursor-pointer font-semibold text-black"
-              >
-                Correct
-              </label>
+              <div class="flex gap-2.5">
+                <input
+                  :id="`aggree4`"
+                  type="radio"
+                  value="option4"
+                  name="correct-option"
+                  class="checkbox-style"
+                  v-model="correctOption"
+                  v-bind="correctOptionAttr"
+                />
+                <label
+                  :for="`aggree4`"
+                  class="text-16 cursor-pointer font-semibold text-black"
+                >
+                  Correct
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <Button
-        :disabled="isPendingQuestion"
-        type="submit"
-        variant="blue"
-        customClass="w-full"
-        >{{ isPendingQuestion ? "Loading..." : "Create Question" }}</Button
-      >
+        <Button
+          :disabled="isPendingQuestion || isPendingQuestionUpdate"
+          type="submit"
+          variant="blue"
+          customClass="w-full"
+          >{{
+            isPendingQuestion
+              ? "Loading..."
+              : route.params.questionId
+              ? "Update Question"
+              : "Create Question"
+          }}</Button
+        >
+      </div>
     </form>
   </div>
 </template>

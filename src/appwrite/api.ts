@@ -100,7 +100,7 @@ export async function updateData({
   documentId,
 }: {
   collection: collection;
-  datas: CollectionUserIF | CollectionCourseIF;
+  datas: CollectionUserIF | CollectionCourseIF | CollectionQuestionIF;
   documentId: string;
 }) {
   try {

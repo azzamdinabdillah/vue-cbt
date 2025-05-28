@@ -115,6 +115,11 @@ const router = createRouter({
               name: "new-question",
             },
             {
+              path: "manage-course/:courseId/new-question/:questionId",
+              component: NewQuestion,
+              name: "edit-question",
+            },
+            {
               path: "student/:courseId",
               component: Student,
               name: "student",

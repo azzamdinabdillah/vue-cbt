@@ -255,14 +255,21 @@ onMounted(() => {
           <div
             class="flex gap-2 md:gap-3.5 justify-end items-center w-full md:w-fit"
           >
-            <Button
-              variant="black"
-              type="button"
-              :shadow="false"
-              custom-class="px-[30px]"
+            <RouterLink
+              :to="{
+                name: 'edit-question',
+                params: { questionId: question.$id },
+              }"
             >
-              Edit
-            </Button>
+              <Button
+                variant="black"
+                type="button"
+                :shadow="false"
+                custom-class="px-[30px]"
+              >
+                Edit
+              </Button>
+            </RouterLink>
             <button
               class="hover:scale-105 transition cursor-pointer disabled:opacity-20"
               :disabled="loadingDeleteQuestion"
