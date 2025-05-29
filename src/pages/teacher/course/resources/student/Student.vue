@@ -4,7 +4,7 @@ import Breadcrump from "../../../../../components/Breadcrump.vue";
 import Button from "../../../../../components/Button.vue";
 import CategoryBadge from "../../../../../components/CategoryBadge.vue";
 import IsPassed from "../../../../../components/IsPassed.vue";
-import { computed, toRaw, watchEffect } from "vue";
+import { computed, onMounted, toRaw, watch, watchEffect } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getData, getSingleData } from "../../../../../appwrite/api";
 import SkeletonDetailCourse from "../../../../../components/skeleton/SkeletonDetailCourse.vue";
@@ -28,10 +28,11 @@ const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
   }
 );
 
-const { data: studentsCourseData } = useQuery({
-  enabled: computed(() => !!route.params.courseId),
-  queryKey: ["questionDatas", route.params.courseId],
+const { data: studentsCourseData, refetch: refetchStudentCourse } = useQuery({
+  enabled: computed(() => !!route.fullPath),
+  queryKey: ["studentCourse", route.fullPath],
   queryFn: async () => {
+    console.log("ambil data course student");
     return await getData({
       collection: "students_course",
       query: [Query.equal("course_id", route.params.courseId ?? "")],
@@ -39,30 +40,49 @@ const { data: studentsCourseData } = useQuery({
   },
 });
 
-const { data: studentsData, isPending: loadingStudentsData } = useQuery({
+const {
+  data: studentsData,
+  isPending: loadingStudentsData,
+  refetch: refetchStudents,
+} = useQuery({
+  refetchOnMount: true,
   enabled: computed(() => !!studentsCourseData.value),
   queryKey: ["student", studentsCourseData.value],
   queryFn: async () => {
-    if (studentsCourseData.value?.length === 0) {
-      return false;
-    } else {
-      return await getData({
-        collection: "users",
-        query: [
-          Query.equal(
-            "$id",
-            studentsCourseData.value?.map((item) => item.user_id) as string[]
-          ),
-        ],
-      });
+    console.log("ambil data student");
+    console.log("raw studentsCourseData:", studentsCourseData.value);
+
+    if (!studentsCourseData.value || studentsCourseData.value.length === 0) {
+      console.log("studentsCourseData kosong atau undefined");
+      return [];
     }
+
+    const userIds = studentsCourseData.value.map((item) => item.user_id);
+    console.log("student map", userIds);
+
+    return await getData({
+      collection: "users",
+      query: [Query.equal("$id", userIds)],
+    });
   },
 });
 
-watchEffect(() => {
-  console.log(toRaw(studentsCourseData.value));
-  console.log(route.params.courseId);
+onMounted(() => {
+  console.log("mounted");
+  refetchStudentCourse();
+
+  if (studentsCourseData.value) {
+    console.log("mari");
+
+    refetchStudents();
+  }
 });
+
+// watchEffect(() => {
+//   console.log(toRaw(studentsCourseData.value));
+//   console.log(toRaw(studentsData.value));
+//   console.log(route.fullPath);
+// });
 </script>
 
 <template>
@@ -134,7 +154,9 @@ watchEffect(() => {
               </div>
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/profile-2user.svg" alt="" />
-                <p class="text-16 text-black font-semibold">489,509 students</p>
+                <p class="text-16 text-black font-semibold">
+                  {{ studentsData?.length }} students
+                </p>
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { databases } from "./config";
 import type {
   CollectionCourseIF,
   CollectionQuestionIF,
+  CollectionStudentCourseIF,
   CollectionUserIF,
 } from "../interface/databaseCollection";
 
@@ -82,7 +83,7 @@ export async function createData({
   datas,
 }: {
   collection: collection;
-  datas: CollectionUserIF | CollectionCourseIF | CollectionQuestionIF;
+  datas: CollectionUserIF | CollectionCourseIF | CollectionQuestionIF | CollectionStudentCourseIF;
 }) {
   try {
     const result = await databases.createDocument(

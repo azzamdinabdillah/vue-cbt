@@ -28,3 +28,12 @@ export interface CollectionQuestionIF {
   correct_option: string;
   created_at?: Date;
 }
+
+export interface CollectionStudentCourseIF {
+  id?: string;
+  user_id: string;
+  course_id: string;
+  result?: string;
+  is_passed?: boolean;
+  created_at?: Date;
+}
