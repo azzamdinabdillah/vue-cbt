@@ -40,6 +40,16 @@ const { data: lastCourse, isPending: lastCourseLoading } = useQuery<
   },
 });
 
+const { data: totalStudents } = useQuery({
+  queryKey: ["totalStudents"],
+  queryFn: async () => {
+    return await getData({
+      collection: "users",
+      query: [Query.equal("role", "student")],
+    });
+  },
+});
+
 const stats = computed(() => [
   {
     title: "Total Courses",
@@ -48,7 +58,7 @@ const stats = computed(() => [
   },
   {
     title: "Total Students",
-    value: "1,500,000",
+    value: totalStudents.value?.length || 0,
     image: "/icons/last-course-2.svg",
   },
   {
