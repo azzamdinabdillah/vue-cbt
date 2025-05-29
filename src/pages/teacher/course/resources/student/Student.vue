@@ -11,6 +11,7 @@ import SkeletonDetailCourse from "../../../../../components/skeleton/SkeletonDet
 import { urlFileStorage } from "../../../../../appwrite/storage";
 import dayjs from "dayjs";
 import { Query } from "appwrite";
+import SkeletonStudentList from "../../../../../components/skeleton/SkeletonStudentList.vue";
 
 const route = useRoute();
 
@@ -28,8 +29,8 @@ const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
 );
 
 const { data: studentsCourseData } = useQuery({
-  enabled: !!route.params.courseId,
-  queryKey: ["questionDatas", singleCourseData.value?.$id],
+  enabled: computed(() => !!route.params.courseId),
+  queryKey: ["questionDatas", route.params.courseId],
   queryFn: async () => {
     return await getData({
       collection: "students_course",
@@ -38,29 +39,29 @@ const { data: studentsCourseData } = useQuery({
   },
 });
 
-const { data: studentsData } = useQuery({
+const { data: studentsData, isPending: loadingStudentsData } = useQuery({
   enabled: computed(() => !!studentsCourseData.value),
   queryKey: ["student", studentsCourseData.value],
   queryFn: async () => {
-    return await getData({
-      collection: "users",
-      query: [
-        Query.equal(
-          "$id",
-          studentsCourseData.value?.map((item) => item.user_id) as string[]
-        ),
-      ],
-    });
+    if (studentsCourseData.value?.length === 0) {
+      return false;
+    } else {
+      return await getData({
+        collection: "users",
+        query: [
+          Query.equal(
+            "$id",
+            studentsCourseData.value?.map((item) => item.user_id) as string[]
+          ),
+        ],
+      });
+    }
   },
 });
 
 watchEffect(() => {
   console.log(toRaw(studentsCourseData.value));
-  // console.log(toRaw(studentsCourseData.value?.map((item) => item.user_id)));
-
-  if (studentsCourseData.value) {
-    console.log(toRaw(studentsData.value));
-  }
+  console.log(route.params.courseId);
 });
 </script>
 
@@ -154,35 +155,43 @@ watchEffect(() => {
       <div class="flex gap-3 flex-col">
         <h1 class="text-24 font-bold text-black">Students</h1>
         <div class="flex gap-5 flex-col">
-          <div
-            v-for="(student, index) in studentsData"
-            :key="index"
-            class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
-          >
-            <div class="flex gap-4 items-center">
-              <img class="md:w-[50px]" src="/icons/photo.svg" alt="" />
-              <div class="">
-                <h3 class="text-20 text-black font-bold">
-                  {{ student.name }}
-                </h3>
-                <p class="text-16 text-gray">{{ student.email }}</p>
+          <SkeletonStudentList
+            v-if="loadingStudentsData"
+            v-for="i in 3"
+            :key="i"
+          ></SkeletonStudentList>
+
+          <template v-else>
+            <h1
+              v-if="!studentsData?.length"
+              class="text-16 text-black font-semibold text-center"
+            >
+              students is empty, please add student first
+            </h1>
+
+            <div
+              v-else
+              v-for="(student, index) in studentsData"
+              :key="index"
+              class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
+            >
+              <div class="flex gap-4 items-center">
+                <img class="md:w-[50px]" src="/icons/photo.svg" alt="" />
+                <div class="">
+                  <h3 class="text-20 text-black font-bold">
+                    {{ student.name }}
+                  </h3>
+                  <p class="text-16 text-gray">{{ student.email }}</p>
+                </div>
               </div>
+
+              <IsPassed v-if="index % 2 === 0" size="sm" :is-passed="true" />
+
+              <IsPassed v-else size="sm" :is-passed="false" />
             </div>
-
-            <IsPassed v-if="index % 2 === 0" size="sm" :is-passed="true" />
-
-            <IsPassed v-else size="sm" :is-passed="false" />
-          </div>
+          </template>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* .border-dashed {
-  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%2306BC65FF' stroke-width='7' stroke-dasharray='9' stroke-dashoffset='5' stroke-linecap='butt'/%3e%3c/svg%3e");
-  border-radius: 10px;
-  overflow: hidden;
-} */
-</style>
