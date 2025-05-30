@@ -28,17 +28,19 @@ const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
   }
 );
 
-const { data: studentsCourseData, refetch: refetchStudentCourse } = useQuery({
-  enabled: computed(() => !!route.fullPath),
-  queryKey: ["studentCourse", route.fullPath],
-  queryFn: async () => {
-    console.log("ambil data course student");
-    return await getData({
-      collection: "students_course",
-      query: [Query.equal("course_id", route.params.courseId ?? "")],
-    });
-  },
-});
+const { data: studentsCourseData, isPending: loadingStudentsCourse } = useQuery(
+  {
+    enabled: computed(() => !!route.fullPath),
+    queryKey: ["studentCourse", route.fullPath],
+    queryFn: async () => {
+      console.log("ambil data course student");
+      return await getData({
+        collection: "students_course",
+        query: [Query.equal("course_id", route.params.courseId ?? "")],
+      });
+    },
+  }
+);
 
 const {
   data: studentsData,
@@ -49,16 +51,12 @@ const {
   enabled: computed(() => !!studentsCourseData.value),
   queryKey: ["student", studentsCourseData.value],
   queryFn: async () => {
-    console.log("ambil data student");
-    console.log("raw studentsCourseData:", studentsCourseData.value);
-
     if (!studentsCourseData.value || studentsCourseData.value.length === 0) {
       console.log("studentsCourseData kosong atau undefined");
       return [];
     }
 
     const userIds = studentsCourseData.value.map((item) => item.user_id);
-    console.log("student map", userIds);
 
     return await getData({
       collection: "users",
@@ -67,12 +65,9 @@ const {
   },
 });
 
-onMounted(() => {
-  console.log("mounted");
-  refetchStudentCourse();
-
+watch(studentsCourseData, () => {
   if (studentsCourseData.value) {
-    console.log("mari");
+    console.log(toRaw(studentsCourseData.value));
 
     refetchStudents();
   }
@@ -178,7 +173,7 @@ onMounted(() => {
         <h1 class="text-24 font-bold text-black">Students</h1>
         <div class="flex gap-5 flex-col">
           <SkeletonStudentList
-            v-if="loadingStudentsData"
+            v-if="loadingStudentsData || loadingStudentsCourse"
             v-for="i in 3"
             :key="i"
           ></SkeletonStudentList>
