@@ -68,11 +68,15 @@ const router = createRouter({
         const parsedUser = JSON.parse(user);
         const role = parsedUser.role;
 
-        if (role === "student" && to.name !== "student-overview") {
+        if (
+          role === "student" &&
+          to.name !== "student-overview" &&
+          to.path === "/"
+        ) {
           return next({ name: "student-overview" });
         }
 
-        if (role !== "student" && to.name !== "overview") {
+        if (role !== "student" && to.name !== "overview" && to.path === "/") {
           return next({ name: "overview" });
         }
 
