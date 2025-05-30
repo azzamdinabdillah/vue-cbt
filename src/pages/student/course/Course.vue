@@ -6,6 +6,39 @@ import CategoryBadge from "../../../components/CategoryBadge.vue";
 import Title from "../../../components/Title.vue";
 import dayjs from "dayjs";
 import type { Category } from "../../../interface/commonType";
+import { useQuery } from "@tanstack/vue-query";
+import { getData } from "../../../appwrite/api";
+import { Query } from "appwrite";
+import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
+import { computed, toRaw, watch, watchEffect } from "vue";
+
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+const { data: courses } = useQuery({
+  queryKey: ["courses"],
+  queryFn: async () => {
+    const studentCourses = await getData({
+      collection: "students_course",
+      query: [Query.equal("user_id", user.$id)],
+    });
+
+    const courseIds = studentCourses.map((item) => item.course_id);
+
+    const courses = await getData({
+      collection: "courses",
+      query: [Query.equal("$id", courseIds)],
+    });
+
+    return courses.map((item) => {
+      return {
+        ...item,
+        isPassed: studentCourses.find(
+          (studentCourse) => studentCourse.course_id === item.$id
+        )?.is_passed,
+      };
+    });
+  },
+});
 
 interface TableIF {
   course: {
@@ -70,6 +103,36 @@ const table: TableIF[] = [
     isComplete: false,
   },
 ];
+
+const tableInstance = useVueTable({
+  data: computed(() => courses.value ?? []),
+  columns: [
+    {
+      accessorKey: "course",
+      header: "Course",
+    },
+    {
+      accessorKey: "dateCreated",
+      header: "Date Created",
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+    },
+    {
+      accessorKey: "action",
+      header: "Action",
+    },
+  ],
+
+  getCoreRowModel: getCoreRowModel(),
+});
+
+watch(courses, () => {
+  // console.log(toRaw(tableInstance.getRowModel().rows[0].original));
+  console.log(tableInstance.getAllColumns()[0]);
+  
+});
 </script>
 
 <template>
