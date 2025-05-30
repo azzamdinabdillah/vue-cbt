@@ -30,7 +30,7 @@ const router = createRouter({
         const user = localStorage.getItem("user");
 
         if (user) {
-          if (JSON.parse(user).role !== "student") {
+          if (JSON.parse(user).role === "student") {
             next({ name: "student-overview" });
           } else {
             next({ name: "overview" });
@@ -153,12 +153,20 @@ const router = createRouter({
         const parsedUser = JSON.parse(user);
         const role = parsedUser.role;
 
-        if (role === "student" && to.name !== "student-overview") {
+        if (
+          role === "student" &&
+          to.name !== "student-overview" &&
+          to.path === "/"
+        ) {
           return next({ name: "student-overview" });
         }
 
-        if (role !== "student" && to.name !== "overview") {
-          return next({ name: "overview" });
+        if (
+          role !== "student" &&
+          to.name !== "student-overview" &&
+          to.path === "/"
+        ) {
+          return next({ name: "student-overview" });
         }
 
         return next();

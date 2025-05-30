@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { getData } from "../../../appwrite/api";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
-import { computed } from "vue";
+import { computed, toRaw, watchEffect } from "vue";
 import { Query } from "appwrite";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import { urlFileStorage } from "../../../appwrite/storage";
@@ -49,6 +49,26 @@ const { data: totalStudents } = useQuery({
     });
   },
 });
+
+const { data: newStudentsAddedDatas, isPending: loadingNewStudentsAddedDatas } =
+  useQuery({
+    queryKey: ["newStudentsAdded"],
+    queryFn: async () => {
+      const studentCourseData = await getData({
+        collection: "students_course",
+        query: [Query.orderDesc("$createdAt"), Query.limit(3)],
+      });
+
+      const usersId = studentCourseData.map((item) => item.user_id);
+
+      const users = await getData({
+        collection: "users",
+        query: [Query.equal("$id", usersId)],
+      });
+
+      return users;
+    },
+  });
 
 const stats = computed(() => [
   {
@@ -179,17 +199,35 @@ const lastStudentsAdded = [
 
       <div class="flex-col-16">
         <h1 class="text-18 text-black font-bold">New Students Added</h1>
-
-        <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-5" v-if="loadingNewStudentsAddedDatas">
           <div
-            v-for="(student, index) in lastStudentsAdded"
+            v-for="i in 3"
+            :key="i"
+            class="flex items-center gap-4 animate-pulse"
+          >
+            <div
+              alt=""
+              class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full bg-gray-200"
+            ></div>
+            <div class="flex flex-col gap-2 flex-grow">
+              <h4
+                class="text-18 font-bold text-black w-[70%] h-6 rounded bg-gray-100"
+              ></h4>
+              <p class="text-16 text-gray w-[40%] h-5 rounded bg-gray-100"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-5" v-else>
+          <div
+            v-for="(student, index) in newStudentsAddedDatas"
             :key="index"
             class="flex items-center gap-4"
           >
-            <img :src="student.image" alt="" class="w-[50px] md:w-[64px]" />
+            <img src="/icons/photo.svg" alt="" class="w-[50px] md:w-[64px]" />
             <div class="flex-col-1">
               <h4 class="text-18 font-bold text-black">{{ student.name }}</h4>
-              <p class="text-16 text-gray">{{ student.subtitle }}</p>
+              <p class="text-16 text-gray">{{ student.role }}</p>
             </div>
           </div>
         </div>
