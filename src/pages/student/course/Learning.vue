@@ -1,14 +1,71 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref, toRaw, watchEffect } from "vue";
 import Button from "../../../components/Button.vue";
 import FloatingMenu from "../../../components/FloatingMenu.vue";
+import { useQuery } from "@tanstack/vue-query";
+import { useRoute } from "vue-router";
+import { getData, getSingleData } from "../../../appwrite/api";
+import { Query } from "appwrite";
+import type {
+  CollectionCourseIF,
+  CollectionQuestionIF,
+} from "../../../interface/databaseCollection";
 
 interface QuestionIF {
   id: number;
   question: string;
-  isAnswered: number;
+  isAnswered?: number;
   options: { id: number; title: string; correct: boolean }[];
 }
+
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+const route = useRoute();
+
+const { data } = useQuery({
+  queryKey: ["course", route.params.courseId],
+  queryFn: async () => {
+    const course = await getSingleData({
+      collection: "courses",
+      documentId: route.params.courseId as string,
+    });
+
+    const courseMap = {
+      id: course.$id,
+      name: course.name,
+      category: course.category,
+      level: course.level,
+      image: course.image,
+      created_at: new Date(course.$createdAt),
+    };
+
+    const questions = await getData({
+      collection: "questions",
+      query: [Query.equal("course_id", course.$id)],
+    });
+
+    const questionMap = questions.map((item): CollectionQuestionIF => {
+      return {
+        id: item.$id,
+        question: item.question,
+        option1: item.option1,
+        option2: item.option2,
+        option3: item.option3,
+        option4: item.option4,
+        correct_option: item.correct_option,
+        course_id: item.course_id,
+      };
+    });
+
+    return {
+      ...courseMap,
+      questions: questionMap,
+    };
+  },
+});
+
+watchEffect(() => {
+  console.log(toRaw(data.value));
+});
 
 const questions = [
   {
@@ -216,9 +273,9 @@ const isCourseCompleted = ref(false);
           <div class="flex gap-3 md:gap-4 items-center md:flex-row-reverse">
             <img class="w-12.5" src="/icons/photo.svg" alt="" />
             <div class="flex-col-1">
-              <p class="text-14 text-gray md:text-end">Howdy</p>
+              <p class="text-14 text-gray md:text-end">{{ user.role }}</p>
               <h1 class="text-16 font-bold text-black md:text-end">
-                Bondan Poro
+                {{ user.name }}
               </h1>
             </div>
           </div>

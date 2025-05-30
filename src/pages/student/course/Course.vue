@@ -10,7 +10,9 @@ import { useQuery } from "@tanstack/vue-query";
 import { getData } from "../../../appwrite/api";
 import { Query } from "appwrite";
 import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
-import { computed, toRaw, watch, watchEffect } from "vue";
+import { computed, toRaw, watch } from "vue";
+import type { CollectionCourseIF } from "../../../interface/databaseCollection";
+import { urlFileStorage } from "../../../appwrite/storage";
 
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -29,9 +31,15 @@ const { data: courses } = useQuery({
       query: [Query.equal("$id", courseIds)],
     });
 
-    return courses.map((item) => {
+    return courses.map((item): CollectionCourseIF & { isPassed: boolean } => {
       return {
-        ...item,
+        // ...item,
+        id: item.$id,
+        name: item.name,
+        category: item.category,
+        level: item.level,
+        image: item.image,
+        created_at: new Date(item.$createdAt),
         isPassed: studentCourses.find(
           (studentCourse) => studentCourse.course_id === item.$id
         )?.is_passed,
@@ -39,70 +47,6 @@ const { data: courses } = useQuery({
     });
   },
 });
-
-interface TableIF {
-  course: {
-    image: string;
-    title: string;
-    subtitle: string;
-  };
-  dateCreated: Date;
-  isComplete: boolean;
-  category: Category;
-}
-
-const table: TableIF[] = [
-  {
-    course: {
-      image: "/icons/last-course-1.svg",
-      title: "Design Interview",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-08-22"),
-    category: "Design",
-    isComplete: false,
-  },
-  {
-    course: {
-      image: "/icons/last-course-2.svg",
-      title: "Intro to Full-Stack",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-03-11"),
-    category: "Programming",
-    isComplete: true,
-  },
-  {
-    course: {
-      image: "/icons/last-course-3.svg",
-      title: "Digital Marketing 101",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-03-11"),
-    category: "Marketing",
-    isComplete: false,
-  },
-  {
-    course: {
-      image: "/icons/last-course-4.svg",
-      title: "Usability-Testing",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-06-30"),
-    category: "Design",
-    isComplete: true,
-  },
-  {
-    course: {
-      image: "/icons/last-course-5.svg",
-      title: "Web Development",
-      subtitle: "Beginners",
-    },
-    dateCreated: new Date("2024-06-30"),
-    category: "Programming",
-    isComplete: false,
-  },
-];
 
 const tableInstance = useVueTable({
   data: computed(() => courses.value ?? []),
@@ -129,9 +73,10 @@ const tableInstance = useVueTable({
 });
 
 watch(courses, () => {
-  // console.log(toRaw(tableInstance.getRowModel().rows[0].original));
-  console.log(tableInstance.getAllColumns()[0]);
-  
+  // console.log(tableInstance.getHeaderGroups()[0].headers);
+
+  console.log(toRaw(tableInstance.getRowModel().rows[0].original));
+  // console.log(tableInstance.getAllColumns()[0]);
 });
 </script>
 
@@ -143,38 +88,88 @@ watch(courses, () => {
     <div class="overflow-x-auto overflow-y-hidden w-full pb-6 lg:pb-0">
       <table class="w-max md:w-full">
         <thead>
-          <tr>
+          <!-- <tr>
             <th class="text-start">Course</th>
             <th>Date Created</th>
             <th>Category</th>
             <th>Action</th>
+          </tr> -->
+
+          <tr>
+            <th v-for="header in tableInstance.getHeaderGroups()[0].headers">
+              {{ header.column.columnDef.header }}
+            </th>
           </tr>
         </thead>
 
         <tbody>
-          <tr v-for="(row, index) in table">
-            <td>
-              <div class="flex items-center gap-4">
-                <img
-                  :src="row.course.image"
-                  alt=""
-                  class="w-[50px] md:w-[64px]"
-                />
-                <div class="flex-col-1">
-                  <h4 class="text-18 font-bold text-black">
-                    {{ row.course.title }}
-                  </h4>
-                  <p class="text-16 text-gray text-start font-normal">
-                    {{ row.course.subtitle }}
-                  </p>
+          <tr
+            v-for="(row, index) in tableInstance.getRowModel().rows"
+            :key="index"
+          >
+            <td v-for="(cell, index) in row.getVisibleCells()" :key="index">
+              <template v-if="cell.column.id === 'course'">
+                <div class="flex items-center gap-4 lg:max-w-[200px]">
+                  <img
+                    :src="urlFileStorage(cell.row.original.image || '')"
+                    alt=""
+                    class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
+                  />
+                  <div class="flex-col-1">
+                    <h4
+                      class="text-18 font-bold text-black capitalize text-start max-w-[180px] text-ellipsis overflow-hidden whitespace-nowrap"
+                    >
+                      {{ cell.row.original.name }}
+                    </h4>
+                    <p
+                      class="text-16 text-gray text-start font-normal capitalize"
+                    >
+                      {{ cell.row.original.level }}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </template>
+
+              <template v-else-if="cell.column.id === 'dateCreated'">
+                {{ dayjs(cell.row.original.created_at).format("DD MMMM YYYY") }}
+              </template>
+
+              <template v-else-if="cell.column.id === 'category'">
+                <CategoryBadge
+                  :category="cell.row.original.category as Category"
+                ></CategoryBadge>
+              </template>
+
+              <template v-else-if="cell.column.id === 'action'">
+                <RouterLink
+                  :to="{
+                    name: 'raport-details',
+                    params: { courseId: cell.row.original.id },
+                  }"
+                >
+                  <Button
+                    custom-class="!w-[120px] py-[10px]"
+                    v-if="cell.row.original.isPassed"
+                    variant="black"
+                    >Rapport</Button
+                  >
+                </RouterLink>
+                <RouterLink
+                  :to="{
+                    name: 'learning',
+                    params: { courseId: cell.row.original.id },
+                  }"
+                >
+                  <Button
+                    custom-class="!w-[120px] py-[10px]"
+                    v-if="!cell.row.original.isPassed"
+                    variant="blue"
+                    >Start Test</Button
+                  >
+                </RouterLink>
+              </template>
             </td>
-            <td>{{ dayjs(row.dateCreated).format("DD MMMM YYYY") }}</td>
-            <td>
-              <CategoryBadge :category="row.category" />
-            </td>
-            <td>
+            <!-- <td>
               <RouterLink
                 :to="{ name: 'raport-details', params: { courseId: index } }"
               >
@@ -195,7 +190,7 @@ watch(courses, () => {
                   >Start Test</Button
                 >
               </RouterLink>
-            </td>
+            </td> -->
           </tr>
         </tbody>
       </table>
