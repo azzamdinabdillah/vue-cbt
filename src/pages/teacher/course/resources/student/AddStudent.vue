@@ -48,10 +48,22 @@ const { mutate: studentCourseMutate, isPending: loadingStudentCourseMutate } =
         query: [Query.equal("email", datas.user_id)],
       });
 
+      const studentCourse = await getData({
+        collection: "students_course",
+        query: [
+          Query.equal("course_id", datas.course_id),
+          Query.equal("user_id", student[0].$id),
+        ],
+      });
+
+      console.log(studentCourse);
+
       if (student.length <= 0) {
         throw new Error(
           "Email not found, please make sure your student email is registered"
         );
+      } else if (studentCourse.length > 0) {
+        throw new Error("Student already added");
       } else {
         const result = await createData({
           collection: "students_course",
