@@ -16,7 +16,11 @@ import { urlFileStorage } from "../../../appwrite/storage";
 
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-const { data: courses } = useQuery({
+const {
+  data: courses,
+  isPending: loadingCourses,
+  error: errorCourses,
+} = useQuery({
   queryKey: ["courses"],
   queryFn: async () => {
     const studentCourses = await getData({
@@ -88,21 +92,33 @@ watch(courses, () => {
     <div class="overflow-x-auto overflow-y-hidden w-full pb-6 lg:pb-0">
       <table class="w-max md:w-full">
         <thead>
-          <!-- <tr>
-            <th class="text-start">Course</th>
-            <th>Date Created</th>
-            <th>Category</th>
-            <th>Action</th>
-          </tr> -->
-
           <tr>
-            <th v-for="header in tableInstance.getHeaderGroups()[0].headers">
+            <th
+              v-for="(header, index) in tableInstance.getHeaderGroups()[0]
+                .headers"
+              :class="{
+                'text-start': index === 0,
+              }"
+            >
               {{ header.column.columnDef.header }}
             </th>
           </tr>
         </thead>
 
         <tbody>
+          <tr v-if="errorCourses">
+            <td colspan="4" v-if="errorCourses">Error : {{ errorCourses }}</td>
+          </tr>
+          <tr :key="u" v-for="u in 5" v-else-if="loadingCourses">
+            <td
+              v-for="i in tableInstance.getHeaderGroups()[0].headers.length"
+              :key="i"
+            >
+              <div
+                class="w-[120px] md:w-full h-[30px] rounded-lg animate-pulse bg-gray-100"
+              ></div>
+            </td>
+          </tr>
           <tr
             v-for="(row, index) in tableInstance.getRowModel().rows"
             :key="index"

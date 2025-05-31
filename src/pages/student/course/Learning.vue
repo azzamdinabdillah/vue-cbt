@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, toRaw, watchEffect } from "vue";
+import { computed, reactive, ref, toRaw, watch, watchEffect } from "vue";
 import Button from "../../../components/Button.vue";
 import FloatingMenu from "../../../components/FloatingMenu.vue";
 import { useQuery } from "@tanstack/vue-query";
@@ -10,6 +10,8 @@ import type {
   CollectionCourseIF,
   CollectionQuestionIF,
 } from "../../../interface/databaseCollection";
+import Loader from "../../../components/Loader.vue";
+import { urlFileStorage } from "../../../appwrite/storage";
 
 interface QuestionIF {
   id: number;
@@ -18,11 +20,14 @@ interface QuestionIF {
   options: { id: number; title: string; correct: boolean }[];
 }
 
-const user = JSON.parse(localStorage.getItem("user") || "{}");
+const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
+console.log(user.value);
+
 const route = useRoute();
 
 const { data } = useQuery({
   queryKey: ["course", route.params.courseId],
+  refetchOnWindowFocus: false,
   queryFn: async () => {
     const course = await getSingleData({
       collection: "courses",
@@ -43,7 +48,7 @@ const { data } = useQuery({
       query: [Query.equal("course_id", course.$id)],
     });
 
-    const questionMap = questions.map((item): CollectionQuestionIF => {
+    const questionMap: CollectionQuestionIF[] = questions.map((item) => {
       return {
         id: item.$id,
         question: item.question,
@@ -63,156 +68,45 @@ const { data } = useQuery({
   },
 });
 
-watchEffect(() => {
-  console.log(toRaw(data.value));
-});
-
-const questions = [
-  {
-    id: 1,
-    question: "What is the best way to design a product?",
-    options: [
-      {
-        id: 1,
-        title: "By following the client's instructions",
-        correct: true,
-      },
-      {
-        id: 2,
-        title: "By considering the user",
-        correct: false,
-      },
-      {
-        id: 3,
-        title: "By using a design system",
-        correct: false,
-      },
-      {
-        id: 4,
-        title: "By making it look cool",
-        correct: false,
-      },
-    ],
-  },
-  {
-    id: 2,
-    question: "What is the most important aspect of a product?",
-    options: [
-      {
-        id: 1,
-        title: "That it looks good",
-        correct: false,
-      },
-      {
-        id: 2,
-        title: "That it works well",
-        correct: true,
-      },
-      {
-        id: 3,
-        title: "That it is cheap",
-        correct: false,
-      },
-      {
-        id: 4,
-        title: "That it is expensive",
-        correct: false,
-      },
-    ],
-  },
-  {
-    id: 3,
-    question: "What is the purpose of user testing?",
-    options: [
-      {
-        id: 1,
-        title: "To make sure the product looks good",
-        correct: false,
-      },
-      {
-        id: 2,
-        title: "To make sure the product works as expected",
-        correct: true,
-      },
-      {
-        id: 3,
-        title: "To make sure the product is user-friendly",
-        correct: false,
-      },
-      {
-        id: 4,
-        title: "To make sure the product is cheap",
-        correct: false,
-      },
-    ],
-  },
-  {
-    id: 4,
-    question:
-      "What is the most important thing to consider when designing a product?",
-    options: [
-      {
-        id: 1,
-        title: "That it looks good",
-        correct: false,
-      },
-      {
-        id: 2,
-        title: "That it works well",
-        correct: false,
-      },
-      {
-        id: 3,
-        title: "That it is user-friendly",
-        correct: true,
-      },
-      {
-        id: 4,
-        title: "That it is cheap",
-        correct: false,
-      },
-    ],
-  },
-  {
-    id: 5,
-    question: "What is the best way to make a product user-friendly?",
-    options: [
-      {
-        id: 1,
-        title: "By making it look cool",
-        correct: false,
-      },
-      {
-        id: 2,
-        title: "By making it work well",
-        correct: false,
-      },
-      {
-        id: 3,
-        title: "By considering the user",
-        correct: true,
-      },
-      {
-        id: 4,
-        title: "By making it cheap",
-        correct: false,
-      },
-    ],
-  },
-];
-
 const selectedQuestion = ref<number>(1);
-const mapQuestion: QuestionIF[] = reactive(
-  questions.map((question) => {
-    return {
-      ...question,
-      isAnswered: -1,
-    };
-  })
+const mapQuestion = reactive<CollectionQuestionIF[] & { isAnswered: number }[]>(
+  []
 );
 
 const openMenu = ref(false);
 const isCourseCompleted = ref(false);
+
+watch(data, () => {
+  if (data.value) {
+    mapQuestion.push(
+      ...data.value.questions.map((question, index) => {
+        return {
+          ...question,
+          id: index + 1,
+          options: [
+            {
+              id: 1,
+              title: question.option1,
+            },
+            {
+              id: 2,
+              title: question.option2,
+            },
+            {
+              id: 3,
+              title: question.option3,
+            },
+            {
+              id: 4,
+              title: question.option4,
+            },
+          ],
+          isAnswered: -1,
+        };
+      })
+    );
+  }
+});
 </script>
 
 <template>
@@ -220,10 +114,14 @@ const isCourseCompleted = ref(false);
     <div class="header p-5 border-b border-ee">
       <div class="flex justify-between items-center flex-wrap gap-3">
         <div class="flex gap-3 md:gap-4 items-center">
-          <img class="w-12.5" src="/icons/last-course-1.svg" alt="" />
+          <img
+            class="w-12.5 h-12.5 rounded-full object-cover"
+            :src="urlFileStorage(data?.image)"
+            alt=""
+          />
           <div class="flex-col-1">
-            <h1 class="text-18 font-bold text-black">Digital Marketing 101</h1>
-            <p class="text-14 text-gray">Beginners</p>
+            <h1 class="text-18 font-bold text-black">{{ data?.name }}</h1>
+            <p class="text-14 text-gray">{{ data?.level }}</p>
           </div>
         </div>
         <div
@@ -232,7 +130,7 @@ const isCourseCompleted = ref(false);
           <div
             :class="[
               'relative md:fixed md:top-30',
-              isCourseCompleted ? 'hidden' : '',
+              isCourseCompleted || !data ? 'hidden' : '',
             ]"
           >
             <img
@@ -284,8 +182,15 @@ const isCourseCompleted = ref(false);
     </div>
 
     <div
-      v-if="!isCourseCompleted"
-      class="flex flex-col gap-8 md:gap-[50px] py-8 md:py-8.5 px-3.5 max-w-[821px] mx-auto w-full"
+      class="h-full w-full justify-center items-center flex flex-grow"
+      v-if="!data"
+    >
+      <Loader class="" />
+    </div>
+
+    <div
+      v-else-if="!isCourseCompleted || data"
+      class="flex md:flex-grow justify-center flex-col gap-8 md:gap-[50px] py-8 md:py-8.5 px-3.5 max-w-[821px] mx-auto w-full"
     >
       <div
         v-for="(question, index) in mapQuestion"
@@ -328,7 +233,7 @@ const isCourseCompleted = ref(false);
                 src="/icons/arrow-circle-right.svg"
                 alt=""
               />
-              <p class="text-sm md:text-xl text-black font-semibold">
+              <p class="text-sm md:text-xl text-black font-semibold capitalize">
                 {{ option.title }}
               </p>
             </div>
@@ -361,7 +266,7 @@ const isCourseCompleted = ref(false);
           variant="blue"
           :class="[
             'max-w-[254px] w-full mx-auto',
-            selectedQuestion === questions.length ? 'hidden' : 'inline-block',
+            selectedQuestion === mapQuestion.length ? 'hidden' : 'inline-block',
           ]"
         >
           Next Question

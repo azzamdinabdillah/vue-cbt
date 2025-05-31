@@ -18,7 +18,7 @@ export interface CollectionCourseIF {
 }
 
 export interface CollectionQuestionIF {
-  id?: string;
+  id?: string | number;
   question: string;
   course_id?: string;
   option1: string;
