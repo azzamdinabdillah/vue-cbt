@@ -1,24 +1,14 @@
 <script setup lang="ts">
-import { computed, reactive, ref, toRaw, watch, watchEffect } from "vue";
+import { computed, reactive, ref, toRaw, watch } from "vue";
 import Button from "../../../components/Button.vue";
 import FloatingMenu from "../../../components/FloatingMenu.vue";
 import { useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import { getData, getSingleData } from "../../../appwrite/api";
 import { Query } from "appwrite";
-import type {
-  CollectionCourseIF,
-  CollectionQuestionIF,
-} from "../../../interface/databaseCollection";
+import type { CollectionQuestionIF } from "../../../interface/databaseCollection";
 import Loader from "../../../components/Loader.vue";
 import { urlFileStorage } from "../../../appwrite/storage";
-
-interface QuestionIF {
-  id: number;
-  question: string;
-  isAnswered?: number;
-  options: { id: number; title: string; correct: boolean }[];
-}
 
 const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
 console.log(user.value);
@@ -69,9 +59,13 @@ const { data } = useQuery({
 });
 
 const selectedQuestion = ref<number>(1);
-const mapQuestion = reactive<CollectionQuestionIF[] & { isAnswered: number }[]>(
-  []
-);
+const mapQuestion = reactive<
+  (CollectionQuestionIF & {
+    isAnswered: number;
+    userAnswer?: string;
+    options: { id: number; title: string }[];
+  })[]
+>([]);
 
 const openMenu = ref(false);
 const isCourseCompleted = ref(false);
@@ -107,6 +101,18 @@ watch(data, () => {
     );
   }
 });
+
+function endCourseHandler() {
+  isCourseCompleted.value = true;
+
+  const correctAnswer = mapQuestion.filter(
+    (q) => q.userAnswer === q.correct_option
+  );
+  const result: number = Math.round((correctAnswer.length / mapQuestion.length) * 100);
+  console.log(result);
+
+  console.log(toRaw(correctAnswer));
+}
 </script>
 
 <template>
@@ -218,6 +224,7 @@ watch(data, () => {
                 );
 
                 mapQuestion[questionOption].isAnswered = option.id;
+                mapQuestion[questionOption].userAnswer = `option${option.id}`;
               }
             "
             :class="[
@@ -273,7 +280,7 @@ watch(data, () => {
         </Button>
       </div>
       <Button
-        @click="isCourseCompleted = true"
+        @click="endCourseHandler"
         variant="orange"
         v-if="mapQuestion.every((q) => q.isAnswered !== -1)"
         :class="['max-w-[254px] w-full mx-auto']"
