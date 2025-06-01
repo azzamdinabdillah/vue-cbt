@@ -31,9 +31,10 @@ export interface CollectionQuestionIF {
 
 export interface CollectionStudentCourseIF {
   id?: string;
-  user_id: string;
-  course_id: string;
+  user_id?: string;
+  course_id?: string;
   result?: string;
+  score?: number;
   is_passed?: boolean;
   created_at?: Date;
 }

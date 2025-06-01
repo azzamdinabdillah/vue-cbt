@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { getData } from "../../../appwrite/api";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
-import { computed, toRaw, watchEffect } from "vue";
+import { computed } from "vue";
 import { Query } from "appwrite";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import { urlFileStorage } from "../../../appwrite/storage";
@@ -87,27 +87,6 @@ const stats = computed(() => [
     image: "/icons/last-course-3.svg",
   },
 ]);
-
-const lastStudentsAdded = [
-  {
-    id: 1,
-    name: "John Doe",
-    subtitle: "Students",
-    image: "/icons/photo.svg",
-  },
-  {
-    id: 2,
-    name: "Jane Doe",
-    subtitle: "Students",
-    image: "/icons/photo.svg",
-  },
-  {
-    id: 3,
-    name: "Bob Smith",
-    subtitle: "Students",
-    image: "/icons/photo.svg",
-  },
-];
 </script>
 
 <template>

@@ -4,7 +4,7 @@ import Breadcrump from "../../../../../components/Breadcrump.vue";
 import Button from "../../../../../components/Button.vue";
 import CategoryBadge from "../../../../../components/CategoryBadge.vue";
 import IsPassed from "../../../../../components/IsPassed.vue";
-import { computed, onMounted, toRaw, watch, watchEffect } from "vue";
+import { computed, toRaw, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getData, getSingleData } from "../../../../../appwrite/api";
 import SkeletonDetailCourse from "../../../../../components/skeleton/SkeletonDetailCourse.vue";

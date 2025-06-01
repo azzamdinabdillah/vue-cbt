@@ -187,7 +187,7 @@ const router = createRouter({
               name: "student-course",
             },
             {
-              path: "raport-details/:courseId",
+              path: "raport-details/:courseId/:studentCourseId",
               component: RaportDetails,
               name: "raport-details",
             },
@@ -196,7 +196,7 @@ const router = createRouter({
       ],
     },
     {
-      path: "/learning/:courseId",
+      path: "/learning/:courseId/:studentCourseId",
       component: Learning,
       name: "learning",
     },

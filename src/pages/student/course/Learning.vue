@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { computed, reactive, ref, toRaw, watch } from "vue";
+import { computed, inject, reactive, ref, watch } from "vue";
 import Button from "../../../components/Button.vue";
 import FloatingMenu from "../../../components/FloatingMenu.vue";
-import { useQuery } from "@tanstack/vue-query";
-import { useRoute } from "vue-router";
-import { getData, getSingleData } from "../../../appwrite/api";
+import { useMutation, useQuery } from "@tanstack/vue-query";
+import { RouterLink, useRoute } from "vue-router";
+import { getData, getSingleData, updateData } from "../../../appwrite/api";
 import { Query } from "appwrite";
-import type { CollectionQuestionIF } from "../../../interface/databaseCollection";
+import type {
+  CollectionQuestionIF,
+  CollectionStudentCourseIF,
+} from "../../../interface/databaseCollection";
 import Loader from "../../../components/Loader.vue";
 import { urlFileStorage } from "../../../appwrite/storage";
+import type { ToastIF } from "../../../interface/commonInterface";
 
 const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
-console.log(user.value);
+const toast = inject<ToastIF>("toast")!;
 
 const route = useRoute();
 
-const { data } = useQuery({
+const { data, isPending: loadingData } = useQuery({
   queryKey: ["course", route.params.courseId],
   refetchOnWindowFocus: false,
   queryFn: async () => {
@@ -55,6 +59,27 @@ const { data } = useQuery({
       ...courseMap,
       questions: questionMap,
     };
+  },
+});
+
+const {
+  mutate: updateStudentCourseMutate,
+  isPending: loadingMutateUpdateStudentCourse,
+} = useMutation({
+  mutationFn: async (datas: CollectionStudentCourseIF) => {
+    return await updateData({
+      collection: "students_course",
+      documentId: route.params.studentCourseId as string,
+      datas: datas,
+    });
+  },
+
+  onSuccess: () => {
+    isCourseCompleted.value = true;
+  },
+
+  onError: (error) => {
+    toast.open(error.message, "error");
   },
 });
 
@@ -103,15 +128,22 @@ watch(data, () => {
 });
 
 function endCourseHandler() {
-  isCourseCompleted.value = true;
-
   const correctAnswer = mapQuestion.filter(
     (q) => q.userAnswer === q.correct_option
   );
-  const result: number = Math.round((correctAnswer.length / mapQuestion.length) * 100);
-  console.log(result);
+  const result: number = Math.round(
+    (correctAnswer.length / mapQuestion.length) * 100
+  );
 
-  console.log(toRaw(correctAnswer));
+  // console.log(result);
+
+  // console.log(toRaw(mapQuestion));
+
+  updateStudentCourseMutate({
+    is_passed: result >= 75,
+    result: JSON.stringify(mapQuestion),
+    score: result,
+  });
 }
 </script>
 
@@ -189,13 +221,38 @@ function endCourseHandler() {
 
     <div
       class="h-full w-full justify-center items-center flex flex-grow"
-      v-if="!data"
+      v-if="loadingData"
     >
       <Loader class="" />
     </div>
 
     <div
-      v-else-if="!isCourseCompleted || data"
+      v-else-if="data?.questions.length === 0"
+      class="flex flex-grow h-full flex-col justify-center items-center gap-8 md:gap-[40px] py-8 md:py-8.5 px-3.5 max-w-[372px] mx-auto w-full md:p-0"
+    >
+      <img
+        src="/icons/last-course-1.svg"
+        alt=""
+        class="w-[150px] md:w-[200px]"
+      />
+
+      <div class="flex flex-col gap-1 md:gap-2">
+        <h1 class="text-xl md:text-2xl text-black font-bold text-center">
+          Sorry, there is no question for this course
+        </h1>
+        <p class="text-16 text-gray leading-7 text-center">
+          You can try another course, or contact your teacher to add the
+          question first
+        </p>
+      </div>
+
+      <RouterLink :to="{ name: 'student-course' }">
+        <Button variant="blue" custom-class="">Back To Course List</Button>
+      </RouterLink>
+    </div>
+
+    <div
+      v-else-if="!isCourseCompleted && data"
       class="flex md:flex-grow justify-center flex-col gap-8 md:gap-[50px] py-8 md:py-8.5 px-3.5 max-w-[821px] mx-auto w-full"
     >
       <div
@@ -281,16 +338,17 @@ function endCourseHandler() {
       </div>
       <Button
         @click="endCourseHandler"
+        :disabled="loadingMutateUpdateStudentCourse"
         variant="orange"
         v-if="mapQuestion.every((q) => q.isAnswered !== -1)"
         :class="['max-w-[254px] w-full mx-auto']"
       >
-        End Course
+        {{ loadingMutateUpdateStudentCourse ? "Loading..." : "Finish Test" }}
       </Button>
     </div>
 
     <div
-      v-else
+      v-if="isCourseCompleted"
       class="flex flex-grow h-full flex-col justify-center items-center gap-8 md:gap-[40px] py-8 md:py-8.5 px-3.5 max-w-[372px] mx-auto w-full md:p-0"
     >
       <img

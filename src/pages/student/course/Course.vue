@@ -30,25 +30,36 @@ const {
 
     const courseIds = studentCourses.map((item) => item.course_id);
 
+    console.log(studentCourses);
+
     const courses = await getData({
       collection: "courses",
       query: [Query.equal("$id", courseIds)],
     });
 
-    return courses.map((item): CollectionCourseIF & { isPassed: boolean } => {
-      return {
-        // ...item,
-        id: item.$id,
-        name: item.name,
-        category: item.category,
-        level: item.level,
-        image: item.image,
-        created_at: new Date(item.$createdAt),
-        isPassed: studentCourses.find(
-          (studentCourse) => studentCourse.course_id === item.$id
-        )?.is_passed,
-      };
-    });
+    return courses.map(
+      (
+        item,
+        index
+      ): CollectionCourseIF & {
+        isPassed: boolean;
+        studentCourseId: string;
+        score: number;
+      } => {
+        return {
+          // ...item,
+          id: item.$id,
+          name: item.name,
+          studentCourseId: studentCourses[index].$id,
+          score: studentCourses[index].score,
+          category: item.category,
+          level: item.level,
+          image: item.image,
+          created_at: new Date(item.$createdAt),
+          isPassed: studentCourses[index].is_passed,
+        };
+      }
+    );
   },
 });
 
@@ -79,8 +90,10 @@ const tableInstance = useVueTable({
 watch(courses, () => {
   // console.log(tableInstance.getHeaderGroups()[0].headers);
 
-  console.log(toRaw(tableInstance.getRowModel().rows[0].original));
+  // console.log(toRaw(tableInstance.getRowModel().rows[0].original));
   // console.log(tableInstance.getAllColumns()[0]);
+
+  console.log(toRaw(courses.value));
 });
 </script>
 
@@ -158,28 +171,30 @@ watch(courses, () => {
 
               <template v-else-if="cell.column.id === 'action'">
                 <RouterLink
+                  v-if="cell.row.original.score !== null"
                   :to="{
                     name: 'raport-details',
-                    params: { courseId: cell.row.original.id },
+                    params: {
+                      courseId: cell.row.original.id,
+                      studentCourseId: cell.row.original.studentCourseId,
+                    },
                   }"
                 >
-                  <Button
-                    custom-class="!w-[120px] py-[10px]"
-                    v-if="cell.row.original.isPassed"
-                    variant="black"
+                  <Button custom-class="!w-[120px] py-[10px]" variant="black"
                     >Rapport</Button
                   >
                 </RouterLink>
                 <RouterLink
+                  v-else
                   :to="{
                     name: 'learning',
-                    params: { courseId: cell.row.original.id },
+                    params: {
+                      courseId: cell.row.original.id,
+                      studentCourseId: cell.row.original.studentCourseId,
+                    },
                   }"
                 >
-                  <Button
-                    custom-class="!w-[120px] py-[10px]"
-                    v-if="!cell.row.original.isPassed"
-                    variant="blue"
+                  <Button custom-class="!w-[120px] py-[10px]" variant="blue"
                     >Start Test</Button
                   >
                 </RouterLink>
