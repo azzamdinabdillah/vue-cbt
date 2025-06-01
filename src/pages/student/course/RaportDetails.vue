@@ -14,6 +14,7 @@ import type {
 } from "../../../interface/databaseCollection";
 import { urlFileStorage } from "../../../appwrite/storage";
 import type { Category } from "../../../interface/commonType";
+import SkeletonStudentList from "../../../components/skeleton/SkeletonStudentList.vue";
 
 const route = useRoute();
 
@@ -57,25 +58,6 @@ const {
     };
   },
 });
-
-const questions = [
-  {
-    question: "What is the capital of France?",
-    isCorrect: false,
-  },
-  {
-    question: "What is the capital of Germany?",
-    isCorrect: true,
-  },
-  {
-    question: "What is the capital of United States?",
-    isCorrect: false,
-  },
-  {
-    question: "What is the capital of United Kingdom?",
-    isCorrect: true,
-  },
-];
 </script>
 
 <template>
@@ -139,7 +121,8 @@ const questions = [
                       (q) => q.correct_option === q.userAnswer
                     ).length
                   }}
-                  of {{ data?.questions.length }} correct
+                  of {{ data?.questions.length }} correct | Score : 
+                  {{ data?.studentCourse.score }} / 100
                 </p>
               </div>
             </div>
@@ -155,14 +138,20 @@ const questions = [
       </div>
 
       <div class="flex gap-5 flex-col">
+        <SkeletonStudentList
+          v-if="loadingRefetchData || loadingData"
+          v-for="i in 3"
+          :key="i"
+        />
         <div
-          v-for="(question, index) in questions"
+          v-else
+          v-for="(question, index) in data?.questions"
           :key="index"
           class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
         >
           <div class="flex-col flex gap-1 md:gap-1.5">
             <p class="text-16 text-gray">Question</p>
-            <h2 class="text-20 text-black font-bold">
+            <h2 class="text-20 text-black font-bold capitalize">
               {{ question.question }}
             </h2>
           </div>
@@ -170,15 +159,24 @@ const questions = [
           <div
             :class="[
               'py-2 px-5 rounded-full text-14 font-semibold',
-              question.isCorrect ? 'bg-green text-white' : 'bg-red text-white',
+              question.userAnswer === question.correct_option
+                ? 'bg-green text-white'
+                : 'bg-red text-white',
             ]"
           >
-            {{ question.isCorrect ? "Correct" : "Incorrect" }}
+            {{
+              question.userAnswer === question.correct_option
+                ? "Correct"
+                : "Incorrect"
+            }}
           </div>
         </div>
       </div>
 
-      <div class="gap-5 flex items-center">
+      <div
+        class="gap-5 flex items-center"
+        v-if="!loadingRefetchData && !loadingData"
+      >
         <RouterLink
           :to="{
             name: 'learning',
