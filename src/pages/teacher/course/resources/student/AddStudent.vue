@@ -45,7 +45,7 @@ const { mutate: studentCourseMutate, isPending: loadingStudentCourseMutate } =
     mutationFn: async (datas: CollectionStudentCourseIF) => {
       const student = await getData({
         collection: "users",
-        query: [Query.equal("email", datas.user_id)],
+        query: [Query.equal("email", datas.user_id ?? "")],
       });
 
       if (student.length <= 0) {
@@ -56,7 +56,7 @@ const { mutate: studentCourseMutate, isPending: loadingStudentCourseMutate } =
         const studentCourse = await getData({
           collection: "students_course",
           query: [
-            Query.equal("course_id", datas.course_id),
+            Query.equal("course_id", datas.course_id ?? ""),
             Query.equal("user_id", student[0].$id),
           ],
         });
