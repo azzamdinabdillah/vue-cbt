@@ -109,7 +109,7 @@ const {
           </div>
 
           <div class="flex flex-col gap-3 md:gap-5">
-            <h1 class="text-2xl md:text-3xl text-black font-bold">
+            <h1 class="text-2xl md:text-3xl text-black font-bold capitalize">
               {{ data?.course.name }}
             </h1>
             <div class="flex gap-4 md:gap-5 items-center flex-wrap">

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from "vue";
+import { inject, onMounted } from "vue";
 import Breadcrump from "../../../../components/Breadcrump.vue";
 import Button from "../../../../components/Button.vue";
 import CategoryBadge from "../../../../components/CategoryBadge.vue";
-import FloatingMenu from "../../../../components/FloatingMenu.vue";
+// import FloatingMenu from "../../../../components/FloatingMenu.vue";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import { deleteData, getData, getSingleData } from "../../../../appwrite/api";
@@ -13,7 +13,7 @@ import { Query } from "appwrite";
 import SkeletonDetailCourse from "../../../../components/skeleton/SkeletonDetailCourse.vue";
 import type { ToastIF } from "../../../../interface/commonInterface";
 
-const openMenu = ref(false);
+// const openMenu = ref(false);
 const route = useRoute();
 const toast = inject<ToastIF>("toast")!;
 
@@ -30,9 +30,21 @@ const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
   }
 );
 
+const { data: studentsCourseData } = useQuery({
+  enabled: !!route.params.courseId,
+  queryKey: ["studentCourse", route.params.courseId],
+  queryFn: async () => {
+    return await getData({
+      collection: "students_course",
+      query: [Query.equal("course_id", route.params.courseId as string)],
+    });
+  },
+});
+
 const {
   data: questionDatas,
   isPending: loadingQuestionDatas,
+  isRefetching: loadingRefetchQuestionDatas,
   refetch,
 } = useQuery({
   enabled: !!singleCourseData.value?.$id,
@@ -106,7 +118,7 @@ onMounted(() => {
                   <CategoryBadge :category="singleCourseData?.category" />
                 </div>
               </div>
-              <div class="relative md:hidden">
+              <!-- <div class="relative md:hidden">
                 <img
                   @click="openMenu = !openMenu"
                   src="/images/more.png"
@@ -139,7 +151,7 @@ onMounted(() => {
                     <p class="text-14 font-semibold text-red">Delete Course</p>
                   </div>
                 </FloatingMenu>
-              </div>
+              </div> -->
             </div>
           </div>
 
@@ -158,13 +170,15 @@ onMounted(() => {
               </div>
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/profile-2user.svg" alt="" />
-                <p class="text-16 text-black font-semibold">489,509 students</p>
+                <p class="text-16 text-black font-semibold">
+                  {{ studentsCourseData?.length }} students
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="relative hidden md:inline-block">
+        <!-- <div class="relative hidden md:inline-block">
           <img
             @click="openMenu = !openMenu"
             src="/images/more.png"
@@ -194,11 +208,11 @@ onMounted(() => {
               <p class="text-14 font-semibold text-red">Delete Course</p>
             </div>
           </FloatingMenu>
-        </div>
+        </div> -->
       </div>
 
       <div
-        v-if="loadingQuestionDatas"
+        v-if="loadingQuestionDatas || loadingRefetchQuestionDatas"
         v-for="n in 5"
         :key="n"
         class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center animate-pulse"

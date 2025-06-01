@@ -20,6 +20,7 @@ const {
   data: courses,
   isPending: loadingCourses,
   error: errorCourses,
+  isRefetching: loadingRefetchCourses,
 } = useQuery({
   queryKey: ["courses"],
   queryFn: async () => {
@@ -30,36 +31,38 @@ const {
 
     const courseIds = studentCourses.map((item) => item.course_id);
 
-    console.log(studentCourses);
+    if (studentCourses.length > 0) {
+      const courses = await getData({
+        collection: "courses",
+        query: [Query.equal("$id", courseIds)],
+      });
 
-    const courses = await getData({
-      collection: "courses",
-      query: [Query.equal("$id", courseIds)],
-    });
-
-    return courses.map(
-      (
-        item,
-        index
-      ): CollectionCourseIF & {
-        isPassed: boolean;
-        studentCourseId: string;
-        score: number;
-      } => {
-        return {
-          // ...item,
-          id: item.$id,
-          name: item.name,
-          studentCourseId: studentCourses[index].$id,
-          score: studentCourses[index].score,
-          category: item.category,
-          level: item.level,
-          image: item.image,
-          created_at: new Date(item.$createdAt),
-          isPassed: studentCourses[index].is_passed,
-        };
-      }
-    );
+      return courses.map(
+        (
+          item,
+          index
+        ): CollectionCourseIF & {
+          isPassed: boolean;
+          studentCourseId: string;
+          score: number;
+        } => {
+          return {
+            // ...item,
+            id: item.$id,
+            name: item.name,
+            studentCourseId: studentCourses[index].$id,
+            score: studentCourses[index].score,
+            category: item.category,
+            level: item.level,
+            image: item.image,
+            created_at: new Date(item.$createdAt),
+            isPassed: studentCourses[index].is_passed,
+          };
+        }
+      );
+    } else {
+      return [];
+    }
   },
 });
 
@@ -102,7 +105,20 @@ watch(courses, () => {
     <Title title="My Courses" subTitle="Finish all given tests to grow">
     </Title>
 
-    <div class="overflow-x-auto overflow-y-hidden w-full pb-6 lg:pb-0">
+    <div v-if="courses?.length === 0">
+      <div class="flex-col-wrapper justify-center items-center py-5">
+        <div class="flex-col-1">
+          <h1 class="text-18 text-center text-black font-bold">
+            No Course Found
+          </h1>
+          <p class="text-14 text-gray text-center leading-5">
+            You don't have any course yet
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="overflow-x-auto overflow-y-hidden w-full pb-6 lg:pb-0">
       <table class="w-max md:w-full">
         <thead>
           <tr>
@@ -122,7 +138,11 @@ watch(courses, () => {
           <tr v-if="errorCourses">
             <td colspan="4" v-if="errorCourses">Error : {{ errorCourses }}</td>
           </tr>
-          <tr :key="u" v-for="u in 5" v-else-if="loadingCourses">
+          <tr
+            :key="u"
+            v-for="u in 5"
+            v-else-if="loadingCourses || loadingRefetchCourses"
+          >
             <td
               v-for="i in tableInstance.getHeaderGroups()[0].headers.length"
               :key="i"
@@ -133,6 +153,7 @@ watch(courses, () => {
             </td>
           </tr>
           <tr
+            v-else
             v-for="(row, index) in tableInstance.getRowModel().rows"
             :key="index"
           >

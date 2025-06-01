@@ -28,6 +28,8 @@ const { data: lastCourse, isPending: lastCourseLoading } = useQuery<
       query: [Query.orderDesc("$createdAt"), Query.limit(3)],
     });
 
+    if (datas.length <= 0) return [];
+
     return datas.map((item): CollectionCourseIF => {
       return {
         name: item.name,
@@ -59,6 +61,8 @@ const { data: newStudentsAddedDatas, isPending: loadingNewStudentsAddedDatas } =
         query: [Query.orderDesc("$createdAt"), Query.limit(3)],
       });
 
+      if (studentCourseData.length <= 0) return [];
+
       const usersId = studentCourseData.map((item) => item.user_id);
 
       const users = await getData({
@@ -80,11 +84,6 @@ const stats = computed(() => [
     title: "Total Students",
     value: totalStudents.value?.length || 0,
     image: "/icons/last-course-2.svg",
-  },
-  {
-    title: "Certificates",
-    value: "379,409",
-    image: "/icons/last-course-3.svg",
   },
 ]);
 </script>
@@ -157,6 +156,13 @@ const stats = computed(() => [
           </div>
         </div>
 
+        <p
+          v-else-if="lastCourse && lastCourse.length <= 0"
+          class="text-16 text-gray capitalize"
+        >
+          no courses created yet
+        </p>
+
         <div class="flex flex-col gap-5" v-else>
           <div
             v-for="(course, index) in lastCourse"
@@ -178,6 +184,7 @@ const stats = computed(() => [
 
       <div class="flex-col-16">
         <h1 class="text-18 text-black font-bold">New Students Added</h1>
+
         <div class="flex flex-col gap-5" v-if="loadingNewStudentsAddedDatas">
           <div
             v-for="i in 3"
@@ -196,6 +203,13 @@ const stats = computed(() => [
             </div>
           </div>
         </div>
+
+        <p
+          v-else-if="newStudentsAddedDatas && newStudentsAddedDatas.length <= 0"
+          class="text-16 text-gray capitalize"
+        >
+          no students added yet
+        </p>
 
         <div class="flex flex-col gap-5" v-else>
           <div

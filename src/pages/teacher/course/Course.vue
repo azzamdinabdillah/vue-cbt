@@ -31,9 +31,6 @@ const { mutateAsync: deleteCourseMutate, isPending: loadingDeleteCourse } =
         documentId: documentId,
       });
     },
-    onSuccess: () => {
-      console.log("wes mari");
-    },
   });
 
 const { mutateAsync: deleteFileMutate, isPending: loadingDeleteFile } =

@@ -25,7 +25,7 @@ const user = JSON.parse(localStorage.getItem("user") || "{}");
       <div class="gap-3.5 flex items-center">
         <div class="flex items-center gap-3">
           <div class="flex-col hidden md:flex">
-            <p class="text-14 text-gray text-end">{{ user.role }}</p>
+            <p class="text-14 text-gray text-end capitalize">{{ user.role }}</p>
             <p class="text-black text-16 font-semibold capitalize">{{ user.name }}</p>
           </div>
           <div @click="$emit('toggleSidebar')" class="md:w-[46px] object-cover">

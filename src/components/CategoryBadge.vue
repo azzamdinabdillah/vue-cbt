@@ -9,6 +9,7 @@ const variant: Record<string, string> = {
   Design: "bg-[#FFF2E6] text-[#F6770B]",
   Programming: "bg-[#EAE8FE] text-[#6436F1]",
   Marketing: "bg-[#D5EFFE] text-[#066DFE]",
+  Other: "bg-[#E7EFC7] text-[#0E2148]",
 };
 </script>
 

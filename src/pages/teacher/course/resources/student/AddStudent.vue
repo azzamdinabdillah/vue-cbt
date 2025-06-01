@@ -131,42 +131,44 @@ const { data: singleCourseData, isPending: loadingSingleCourseData } = useQuery(
         v-if="loadingSingleCourseData"
       ></SkeletonDetailCourse>
 
-      <div v-else class="flex items-center gap-6 flex-wrap">
-        <img
-          :src="urlFileStorage(singleCourseData?.image)"
-          alt=""
-          class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover"
-        />
-        <h1 class="text-2xl md:text-3xl text-black font-bold">
-          {{ singleCourseData?.name || "Course Name" }}
-        </h1>
-      </div>
+      <template v-else>
+        <div class="flex items-center gap-6 flex-wrap">
+          <img
+            :src="urlFileStorage(singleCourseData?.image)"
+            alt=""
+            class="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover"
+          />
+          <h1 class="text-2xl md:text-3xl text-black font-bold capitalize">
+            {{ singleCourseData?.name || "Course Name" }}
+          </h1>
+        </div>
 
-      <div class="flex flex-col gap-4 md:gap-5">
-        <h1 class="text-24 font-bold text-black">Add New Student</h1>
+        <div class="flex flex-col gap-4 md:gap-5">
+          <h1 class="text-24 font-bold text-black">Add New Student</h1>
 
-        <InputGroup
-          id="email"
-          prefix="/icons/sms-plain.svg"
-          label="Email Address"
-          placeholder="Write your student email here"
-          type="email"
-          class="w-full"
-          v-model="email"
-          v-bind="emailAttr"
-          :error="errors.email"
-        ></InputGroup>
-      </div>
+          <InputGroup
+            id="email"
+            prefix="/icons/sms-plain.svg"
+            label="Email Address"
+            placeholder="Write your student email here"
+            type="email"
+            class="w-full"
+            v-model="email"
+            v-bind="emailAttr"
+            :error="errors.email"
+          ></InputGroup>
+        </div>
 
-      <Button
-        :disabled="loadingStudentCourseMutate"
-        type="submit"
-        variant="blue"
-        customClass="w-full"
-        >{{
-          loadingStudentCourseMutate ? "Loading..." : "Add Now to Course"
-        }}</Button
-      >
+        <Button
+          :disabled="loadingStudentCourseMutate"
+          type="submit"
+          variant="blue"
+          customClass="w-full"
+          >{{
+            loadingStudentCourseMutate ? "Loading..." : "Add Now to Course"
+          }}</Button
+        >
+      </template>
     </form>
   </div>
 </template>
