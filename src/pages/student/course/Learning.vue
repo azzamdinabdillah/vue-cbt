@@ -19,7 +19,11 @@ const toast = inject<ToastIF>("toast")!;
 
 const route = useRoute();
 
-const { data, isPending: loadingData } = useQuery({
+const {
+  data,
+  isPending: loadingData,
+  isRefetching: loadingRefetchData,
+} = useQuery({
   queryKey: ["course", route.params.courseId],
   refetchOnWindowFocus: false,
   queryFn: async () => {
@@ -221,7 +225,7 @@ function endCourseHandler() {
 
     <div
       class="h-full w-full justify-center items-center flex flex-grow"
-      v-if="loadingData"
+      v-if="loadingData || loadingRefetchData"
     >
       <Loader class="" />
     </div>
@@ -367,9 +371,19 @@ function endCourseHandler() {
         </p>
       </div>
 
-      <Button variant="blue" custom-class="md:!w-[193px]"
-        >View Test Result</Button
+      <RouterLink
+        :to="{
+          name: 'raport-details',
+          params: {
+            courseId: route.params.courseId,
+            studentCourseId: route.params.studentCourseId,
+          },
+        }"
       >
+        <Button variant="blue" custom-class="md:!w-[193px]"
+          >View Test Result</Button
+        >
+      </RouterLink>
     </div>
   </div>
 </template>
