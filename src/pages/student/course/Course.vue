@@ -45,24 +45,27 @@ const {
 
       return courses.map(
         (
-          item,
-          index
+          item
         ): CollectionCourseIF & {
           isPassed: boolean;
           studentCourseId: string;
           score: number;
         } => {
+          const dataSingleStudentCourse = studentCourses.filter(
+            (i) => i.course_id === item.$id
+          )[0];
+
           return {
             // ...item,
             id: item.$id,
             name: item.name,
-            studentCourseId: studentCourses[index].$id,
-            score: studentCourses[index].score,
+            studentCourseId: dataSingleStudentCourse.$id,
+            score: dataSingleStudentCourse.score,
             category: item.category,
             level: item.level,
             image: item.image,
             created_at: new Date(item.$createdAt),
-            isPassed: studentCourses[index].is_passed,
+            isPassed: dataSingleStudentCourse.is_passed,
           };
         }
       );
@@ -115,7 +118,7 @@ watch(courses, () => {
 
   // console.log(toRaw(tableInstance.getRowModel().rows[0].original));
   // console.log(tableInstance.getAllColumns()[0]);
-  console.log(tableInstance.getPaginationRowModel());
+  // console.log(tableInstance.getPaginationRowModel());
 
   console.log(toRaw(courses.value));
 });
@@ -248,7 +251,10 @@ watch(courses, () => {
     </div>
 
     <div class="flex gap-4 items-center">
-      <Pagination v-if="courses?.length" :table-instance="tableInstance as any" />
+      <Pagination
+        v-if="courses?.length"
+        :table-instance="tableInstance as any"
+      />
     </div>
   </div>
 </template>

@@ -84,7 +84,7 @@ const {
       studentCourse: studentsCourseData.value.map((item) => {
         return {
           is_passed: item.is_passed,
-          score: item.score,
+          result: item.result,
         };
       }),
     };
@@ -231,7 +231,7 @@ watchEffect(() => {
 
               <p
                 class="capitalize text-16 text-gray font-semibold"
-                v-if="(studentsData.studentCourse[index].score ?? 0) <= 0"
+                v-if="studentsData.studentCourse[index].result === null"
               >
                 no results yet
               </p>

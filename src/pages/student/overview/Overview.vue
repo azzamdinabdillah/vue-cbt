@@ -1,23 +1,52 @@
-<script setup>
+<script setup lang="ts">
+import { useQuery } from "@tanstack/vue-query";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
+import { getData } from "../../../appwrite/api";
+import { computed, toRaw, watchEffect } from "vue";
+import { Query } from "appwrite";
+
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+console.log(user.$id);
+
+const { data: lastCourseData } = useQuery({
+  queryKey: ["lastCourse"],
+  queryFn: async () => {
+    const studentCoursesData = await getData({
+      collection: "students_course",
+      query: [Query.equal("user_id", user.$id)],
+    });
+
+    // console.log(studentCoursesData);
+
+    return studentCoursesData;
+  },
+});
+
+watchEffect(() => {
+  console.log(toRaw(lastCourseData.value));
+});
 
 const stats = [
   {
     title: "Completed Courses",
-    value: "15,098",
+    value: computed(
+      () =>
+        lastCourseData.value?.filter((item) => item.result !== null).length
+    ),
     image: "/icons/last-course-1.svg",
   },
   {
     title: "Active Enrollments",
-    value: "3,200",
+    value: computed(() => lastCourseData.value?.length),
     image: "/icons/last-course-2.svg",
   },
-  {
-    title: "Certificates Earned",
-    value: "5,478",
-    image: "/icons/last-course-3.svg",
-  },
+  // {
+  //   title: "Certificates Earned",
+  //   value: "5,478",
+  //   image: "/icons/last-course-3.svg",
+  // },
 ];
 
 const recentCoursesEnrolled = [
