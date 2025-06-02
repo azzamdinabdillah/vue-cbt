@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/vue-query";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
 import { getData } from "../../../appwrite/api";
-import { computed, toRaw, watch, watchEffect } from "vue";
+import { computed, watch } from "vue";
 import { Query } from "appwrite";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import { urlFileStorage } from "../../../appwrite/storage";
