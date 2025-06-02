@@ -19,6 +19,7 @@ import { deleteData, getData } from "../../../appwrite/api";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import type { Category } from "../../../interface/commonType";
 import type { ToastIF } from "../../../interface/commonInterface";
+import { Query } from "appwrite";
 
 const toast = inject<ToastIF>("toast")!;
 
@@ -40,12 +41,12 @@ const { mutateAsync: deleteFileMutate, isPending: loadingDeleteFile } =
     },
   });
 
-const { data, error, isPending } = useQuery<CollectionCourseIF[]>({
+const { data, error, isPending, isRefetching } = useQuery<CollectionCourseIF[]>({
   queryKey: ["courses"],
   queryFn: async () => {
     const datas = await getData({
       collection: "courses",
-      query: [],
+      query: [Query.orderDesc("$createdAt")],
     });
 
     return datas.map((item): CollectionCourseIF => {
@@ -161,7 +162,7 @@ async function deleteCourse(documentId: string, fileId: string) {
             <tr v-if="error">
               <td colspan="4" v-if="error">Error : {{ error }}</td>
             </tr>
-            <tr :key="u" v-for="u in 5" v-else-if="isPending">
+            <tr :key="u" v-for="u in 5" v-else-if="isPending || isRefetching">
               <td
                 v-for="i in tableInstance.getHeaderGroups()[0].headers.length"
                 :key="i"

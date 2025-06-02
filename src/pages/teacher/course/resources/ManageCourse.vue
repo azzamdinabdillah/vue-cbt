@@ -263,11 +263,11 @@ onMounted(() => {
         <div
           v-for="(question, index) in questionDatas"
           :key="index"
-          class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
+          class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 justify-between items-center"
         >
           <div class="flex flex-col gap-1.5">
             <h4 class="text-16 text-gray">Question</h4>
-            <p class="text-20 text-black font-bold capitalize">
+            <p class="text-20 text-black font-bold capitalize max-w-[800px] overflow-hidden text-ellipsis whitespace-nowrap">
               {{ question.question }}
             </p>
           </div>

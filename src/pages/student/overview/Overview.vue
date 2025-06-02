@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/vue-query";
 import Button from "../../../components/Button.vue";
 import Title from "../../../components/Title.vue";
 import { getData } from "../../../appwrite/api";
-import { computed, toRaw, watchEffect } from "vue";
+import { computed, toRaw, watch, watchEffect } from "vue";
 import { Query } from "appwrite";
+import type { CollectionCourseIF } from "../../../interface/databaseCollection";
+import { urlFileStorage } from "../../../appwrite/storage";
 
 const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-console.log(user.$id);
 
 const { data: lastCourseData } = useQuery({
   queryKey: ["lastCourse"],
@@ -18,22 +18,54 @@ const { data: lastCourseData } = useQuery({
       query: [Query.equal("user_id", user.$id)],
     });
 
-    // console.log(studentCoursesData);
-
     return studentCoursesData;
   },
 });
 
-watchEffect(() => {
-  console.log(toRaw(lastCourseData.value));
+const {
+  data: courses,
+  isPending: loadingCourses,
+  isRefetching: loadingRefetchCourses,
+} = useQuery({
+  enabled: computed(() => !!lastCourseData.value),
+  queryKey: computed(() => ["courses", lastCourseData.value]),
+  queryFn: async (): Promise<CollectionCourseIF[]> => {
+    const result = await getData({
+      collection: "courses",
+      query: [
+        Query.equal(
+          "$id",
+          (lastCourseData.value ?? []).map((item) => item.course_id)
+        ),
+        Query.orderDesc("$createdAt"),
+        Query.limit(3),
+      ],
+    });
+
+    return result.map((item) => {
+      return {
+        id: item.$id,
+        name: item.name,
+        category: item.category,
+        level: item.level,
+        image: item.image,
+        created_at: new Date(item.$createdAt),
+      };
+    });
+  },
+});
+
+watch(courses, () => {
+  if (lastCourseData.value) {
+    console.log("courses", courses.value);
+  }
 });
 
 const stats = [
   {
     title: "Completed Courses",
     value: computed(
-      () =>
-        lastCourseData.value?.filter((item) => item.result !== null).length
+      () => lastCourseData.value?.filter((item) => item.result !== null).length
     ),
     image: "/icons/last-course-1.svg",
   },
@@ -47,27 +79,6 @@ const stats = [
   //   value: "5,478",
   //   image: "/icons/last-course-3.svg",
   // },
-];
-
-const recentCoursesEnrolled = [
-  {
-    id: 1,
-    title: "Advanced Data Science",
-    subtitle: "Intermediate",
-    image: "/icons/last-course-1.svg",
-  },
-  {
-    id: 2,
-    title: "Machine Learning",
-    subtitle: "Intermediate",
-    image: "/icons/last-course-2.svg",
-  },
-  {
-    id: 3,
-    title: "Cloud Computing",
-    subtitle: "Intermediate",
-    image: "/icons/last-course-3.svg",
-  },
 ];
 </script>
 
@@ -118,16 +129,49 @@ const recentCoursesEnrolled = [
       <div class="flex-col-16">
         <h1 class="text-18 text-black font-bold">Last Course Enrolled</h1>
 
-        <div class="flex flex-col gap-5">
+        <div
+          class="flex flex-col gap-5"
+          v-if="loadingCourses || loadingRefetchCourses"
+        >
           <div
-            v-for="(course, index) in recentCoursesEnrolled"
+            v-for="i in 3"
+            :key="i"
+            class="flex items-center gap-4 animate-pulse"
+          >
+            <div
+              alt=""
+              class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full bg-gray-200"
+            ></div>
+            <div class="flex flex-col gap-2 flex-grow">
+              <h4
+                class="text-18 font-bold text-black w-[70%] h-6 rounded bg-gray-100"
+              ></h4>
+              <p class="text-16 text-gray w-[40%] h-5 rounded bg-gray-100"></p>
+            </div>
+          </div>
+        </div>
+
+        <p
+          v-else-if="courses && courses.length <= 0"
+          class="text-16 text-gray capitalize"
+        >
+          no courses enrolled yet
+        </p>
+
+        <div v-else class="flex flex-col gap-5">
+          <div
+            v-for="(course, index) in courses"
             :key="index"
             class="flex items-center gap-4"
           >
-            <img :src="course.image" alt="" class="w-[50px] md:w-[64px]" />
+            <img
+              :src="urlFileStorage(course.image ?? '')"
+              alt=""
+              class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
+            />
             <div class="flex-col-1">
-              <h4 class="text-18 font-bold text-black">{{ course.title }}</h4>
-              <p class="text-16 text-gray">{{ course.subtitle }}</p>
+              <h4 class="text-18 font-bold text-black capitalize">{{ course.name }}</h4>
+              <p class="text-16 text-gray">{{ course.level }}</p>
             </div>
           </div>
         </div>

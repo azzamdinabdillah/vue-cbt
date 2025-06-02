@@ -175,7 +175,7 @@ const stats = computed(() => [
               class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
             />
             <div class="flex-col-1">
-              <h4 class="text-18 font-bold text-black">{{ course.name }}</h4>
+              <h4 class="text-18 font-bold text-black capitalize">{{ course.name }}</h4>
               <p class="text-16 text-gray">{{ course.level }}</p>
             </div>
           </div>

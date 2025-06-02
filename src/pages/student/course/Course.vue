@@ -40,7 +40,7 @@ const {
     if (studentCourses.length > 0) {
       const courses = await getData({
         collection: "courses",
-        query: [Query.equal("$id", courseIds)],
+        query: [Query.equal("$id", courseIds), Query.orderDesc("$createdAt")],
       });
 
       return courses.map(
