@@ -3,7 +3,7 @@ export interface CollectionUserIF {
   role: roles;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   created_at: Date;
   confirmPassword?: string;
 }

@@ -178,15 +178,15 @@ async function deleteCourse(documentId: string, fileId: string) {
             >
               <td v-for="cell in row.getVisibleCells()" :key="cell.id">
                 <template v-if="cell.column.id === 'course'">
-                  <div class="flex items-center gap-4 lg:max-w-[200px]">
+                  <div class="flex items-center gap-4">
                     <img
                       :src="urlFileStorage(cell.row.original.image || '')"
                       alt=""
                       class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                     />
-                    <div class="flex-col-1">
+                    <div class="flex-col-1 max-w-[300px] overflow-hidden">
                       <h4
-                        class="text-18 font-bold text-black capitalize text-start max-w-[180px] text-ellipsis overflow-hidden whitespace-nowrap"
+                        class="text-18 font-bold text-black capitalize text-ellipsis overflow-hidden text-start whitespace-nowrap"
                       >
                         {{ cell.row.original.name }}
                       </h4>
@@ -216,7 +216,7 @@ async function deleteCourse(documentId: string, fileId: string) {
                     <RouterLink
                       :to="`/course/manage-course/${cell.row.original.id}`"
                       class=""
-                      >Manage</RouterLink
+                      >Question</RouterLink
                     >
                     <RouterLink
                       :to="`/course/student/${cell.row.original.id}`"
@@ -259,11 +259,11 @@ async function deleteCourse(documentId: string, fileId: string) {
       </div>
 
       <div class="flex gap-4 items-center">
-        <div
+        <!-- <div
           v-on:click="tableInstance.getCanNextPage()"
           class="cursor-pointer"
-        ></div>
-        <Pagination :table-instance="tableInstance" />
+        ></div> -->
+        <Pagination v-if="data?.length" :table-instance="tableInstance" />
       </div>
     </div>
   </div>

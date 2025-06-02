@@ -4,7 +4,7 @@ import Breadcrump from "../../../../../components/Breadcrump.vue";
 import Button from "../../../../../components/Button.vue";
 import CategoryBadge from "../../../../../components/CategoryBadge.vue";
 import IsPassed from "../../../../../components/IsPassed.vue";
-import { computed, toRaw, watch } from "vue";
+import { computed, toRaw, watch, watchEffect } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getData, getSingleData } from "../../../../../appwrite/api";
 import SkeletonDetailCourse from "../../../../../components/skeleton/SkeletonDetailCourse.vue";
@@ -12,6 +12,10 @@ import { urlFileStorage } from "../../../../../appwrite/storage";
 import dayjs from "dayjs";
 import { Query } from "appwrite";
 import SkeletonStudentList from "../../../../../components/skeleton/SkeletonStudentList.vue";
+import type {
+  CollectionStudentCourseIF,
+  CollectionUserIF,
+} from "../../../../../interface/databaseCollection";
 
 const route = useRoute();
 
@@ -33,7 +37,6 @@ const { data: studentsCourseData, isPending: loadingStudentsCourse } = useQuery(
     enabled: computed(() => !!route.fullPath),
     queryKey: ["studentCourse", route.fullPath],
     queryFn: async () => {
-      console.log("ambil data course student");
       return await getData({
         collection: "students_course",
         query: [Query.equal("course_id", route.params.courseId ?? "")],
@@ -50,34 +53,58 @@ const {
   refetchOnMount: true,
   enabled: computed(() => !!studentsCourseData.value),
   queryKey: ["student", studentsCourseData.value],
-  queryFn: async () => {
+  queryFn: async (): Promise<{
+    user: CollectionUserIF[];
+    studentCourse: CollectionStudentCourseIF[];
+  }> => {
     if (!studentsCourseData.value || studentsCourseData.value.length === 0) {
       console.log("studentsCourseData kosong atau undefined");
-      return [];
+      return { user: [], studentCourse: [] };
     }
 
     const userIds = studentsCourseData.value.map((item) => item.user_id);
 
-    return await getData({
+    console.log(toRaw(studentsCourseData.value));
+
+    const result = await getData({
       collection: "users",
       query: [Query.equal("$id", userIds)],
     });
+
+    return {
+      user: result.map((item) => {
+        return {
+          id: item.$id,
+          name: item.name,
+          email: item.email,
+          role: item.role,
+          created_at: new Date(item.$createdAt),
+        };
+      }),
+      studentCourse: studentsCourseData.value.map((item) => {
+        return {
+          is_passed: item.is_passed,
+          score: item.score,
+        };
+      }),
+    };
   },
 });
 
 watch(studentsCourseData, () => {
   if (studentsCourseData.value) {
-    console.log(toRaw(studentsCourseData.value));
+    // console.log(toRaw(studentsCourseData.value));
 
     refetchStudents();
+    // console.log("asdasd", toRaw(studentsData.value));
   }
 });
 
-// watchEffect(() => {
-//   console.log(toRaw(studentsCourseData.value));
-//   console.log(toRaw(studentsData.value));
-//   console.log(route.fullPath);
-// });
+watchEffect(() => {
+  // console.log(toRaw(studentsCourseData.value));
+  console.log("mnmnm", toRaw(studentsData.value));
+  // console.log(route.fullPath);
+});
 </script>
 
 <template>
@@ -150,7 +177,7 @@ watch(studentsCourseData, () => {
               <div class="flex gap-1.5 md:gap-2.5 items-center">
                 <img class="w-5 md:w-6" src="/icons/profile-2user.svg" alt="" />
                 <p class="text-16 text-black font-semibold">
-                  {{ studentsData?.length }} students
+                  {{ studentsData?.user.length }} students
                 </p>
               </div>
             </div>
@@ -180,7 +207,7 @@ watch(studentsCourseData, () => {
 
           <template v-else>
             <h1
-              v-if="!studentsData?.length"
+              v-if="!studentsData?.user.length"
               class="text-16 text-black font-semibold text-center"
             >
               students is empty, please add student first
@@ -188,7 +215,7 @@ watch(studentsCourseData, () => {
 
             <div
               v-else
-              v-for="(student, index) in studentsData"
+              v-for="(student, index) in studentsData.user"
               :key="index"
               class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
             >
@@ -202,9 +229,21 @@ watch(studentsCourseData, () => {
                 </div>
               </div>
 
-              <IsPassed v-if="index % 2 === 0" size="sm" :is-passed="true" />
+              <p
+                class="capitalize text-16 text-gray font-semibold"
+                v-if="(studentsData.studentCourse[index].score ?? 0) <= 0"
+              >
+                no results yet
+              </p>
+              <IsPassed
+                v-else
+                size="sm"
+                :is-passed="
+                  studentsData.studentCourse[index].is_passed ?? false
+                "
+              />
 
-              <IsPassed v-else size="sm" :is-passed="false" />
+              <!-- <IsPassed v-else size="sm" :is-passed="false" /> -->
             </div>
           </template>
         </div>

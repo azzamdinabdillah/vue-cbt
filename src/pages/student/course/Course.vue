@@ -9,10 +9,16 @@ import type { Category } from "../../../interface/commonType";
 import { useQuery } from "@tanstack/vue-query";
 import { getData } from "../../../appwrite/api";
 import { Query } from "appwrite";
-import { getCoreRowModel, useVueTable } from "@tanstack/vue-table";
-import { computed, toRaw, watch } from "vue";
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  useVueTable,
+  type TableState,
+} from "@tanstack/vue-table";
+import { computed, ref, toRaw, watch } from "vue";
 import type { CollectionCourseIF } from "../../../interface/databaseCollection";
 import { urlFileStorage } from "../../../appwrite/storage";
+import Pagination from "../../../components/Pagination.vue";
 
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -66,6 +72,11 @@ const {
   },
 });
 
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 5,
+});
+
 const tableInstance = useVueTable({
   data: computed(() => courses.value ?? []),
   columns: [
@@ -88,6 +99,15 @@ const tableInstance = useVueTable({
   ],
 
   getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  state: computed(() => ({
+    pagination: pagination.value,
+  })) as Partial<TableState>,
+  onPaginationChange: (updater) => {
+    const newState =
+      typeof updater === "function" ? updater(pagination.value) : updater;
+    pagination.value = newState;
+  },
 });
 
 watch(courses, () => {
@@ -95,6 +115,7 @@ watch(courses, () => {
 
   // console.log(toRaw(tableInstance.getRowModel().rows[0].original));
   // console.log(tableInstance.getAllColumns()[0]);
+  console.log(tableInstance.getPaginationRowModel());
 
   console.log(toRaw(courses.value));
 });
@@ -154,20 +175,20 @@ watch(courses, () => {
           </tr>
           <tr
             v-else
-            v-for="(row, index) in tableInstance.getRowModel().rows"
+            v-for="(row, index) in tableInstance.getPaginationRowModel().rows"
             :key="index"
           >
             <td v-for="(cell, index) in row.getVisibleCells()" :key="index">
               <template v-if="cell.column.id === 'course'">
-                <div class="flex items-center gap-4 lg:max-w-[200px]">
+                <div class="flex items-center gap-4">
                   <img
                     :src="urlFileStorage(cell.row.original.image || '')"
                     alt=""
                     class="w-[50px] h-[50px] md:w-[64px] md:h-[64px] object-cover rounded-full"
                   />
-                  <div class="flex-col-1">
+                  <div class="flex-col-1 max-w-[300px] overflow-hidden">
                     <h4
-                      class="text-18 font-bold text-black capitalize text-start max-w-[180px] text-ellipsis overflow-hidden whitespace-nowrap"
+                      class="text-18 font-bold text-black capitalize text-start text-ellipsis overflow-hidden whitespace-nowrap"
                     >
                       {{ cell.row.original.name }}
                     </h4>
@@ -227,7 +248,7 @@ watch(courses, () => {
     </div>
 
     <div class="flex gap-4 items-center">
-      <!-- <Pagination v-for="i in 5" :page="i" :isActive="i === 3 ? true : false" /> -->
+      <Pagination v-if="courses?.length" :table-instance="tableInstance as any" />
     </div>
   </div>
 </template>

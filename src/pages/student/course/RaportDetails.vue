@@ -121,7 +121,7 @@ const {
                       (q) => q.correct_option === q.userAnswer
                     ).length
                   }}
-                  of {{ data?.questions.length }} correct | Score : 
+                  of {{ data?.questions.length }} correct | Score :
                   {{ data?.studentCourse.score }} / 100
                 </p>
               </div>
@@ -147,11 +147,13 @@ const {
           v-else
           v-for="(question, index) in data?.questions"
           :key="index"
-          class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 flex-wrap justify-between items-center"
+          class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 justify-between items-center"
         >
           <div class="flex-col flex gap-1 md:gap-1.5">
             <p class="text-16 text-gray">Question</p>
-            <h2 class="text-20 text-black font-bold capitalize">
+            <h2
+              class="text-20 text-black font-bold capitalize max-w-[700px] whitespace-nowrap text-ellipsis overflow-hidden"
+            >
               {{ question.question }}
             </h2>
           </div>
