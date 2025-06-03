@@ -263,17 +263,17 @@ onMounted(() => {
         <div
           v-for="(question, index) in questionDatas"
           :key="index"
-          class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex gap-3 justify-between items-center"
+          class="border border-ee rounded-2xl md:rounded-[20px] p-4 flex-wrap flex gap-3 justify-between items-center"
         >
           <div class="flex flex-col gap-1.5">
             <h4 class="text-16 text-gray">Question</h4>
-            <p class="text-20 text-black font-bold capitalize max-w-[800px] overflow-hidden text-ellipsis whitespace-nowrap">
+            <p class="text-20 text-black font-bold capitalize">
               {{ question.question }}
             </p>
           </div>
 
           <div
-            class="flex gap-2 md:gap-3.5 justify-end items-center w-full md:w-fit"
+            class="flex gap-2 md:gap-3.5 justify-end items-center w-full"
           >
             <RouterLink
               :to="{

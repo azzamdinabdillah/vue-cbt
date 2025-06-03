@@ -162,7 +162,7 @@ function endCourseHandler() {
             alt=""
           />
           <div class="flex-col-1">
-            <h1 class="text-18 font-bold text-black">{{ data?.name }}</h1>
+            <h1 class="text-18 font-bold text-black capitalize">{{ data?.name }}</h1>
             <p class="text-14 text-gray">{{ data?.level }}</p>
           </div>
         </div>
